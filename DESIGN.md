@@ -60,7 +60,7 @@ feedback to users.
 System must store information about users, operators, their messages(feedback), 
 application statuses, documents.
 
-Documents will be stored as files with the path in the db.
+Documents will be stored as files with the path in the db alongside with their master-key encrypted unique encryption keys.
 
 ## Alternatives considered
 

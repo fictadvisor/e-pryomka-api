@@ -1,3 +1,5 @@
 package com.fictadvisor.pryomka.domain.models
 
-@JvmInline value class UserIdentifier(val id: Int)
+import java.util.*
+
+@JvmInline value class UserIdentifier(val value: UUID)

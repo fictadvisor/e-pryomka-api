@@ -10,3 +10,7 @@ runConfigurations.xml
 vcs.xml
 modules.xml
 e-pryomka.iml
+dataSources.xml
+gradle.xml
+jarRepositories.xml
+misc.xml

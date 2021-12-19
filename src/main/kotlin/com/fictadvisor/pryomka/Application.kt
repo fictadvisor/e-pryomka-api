@@ -9,7 +9,7 @@ import com.fictadvisor.pryomka.plugins.initDB
 fun main() {
     embeddedServer(Netty, port = Environment.PORT, host = Environment.HOST) {
         initDB()
-        configureRouting()
         configureSecurity()
+        configureRouting()
     }.start(wait = true)
 }

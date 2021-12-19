@@ -1,0 +1,24 @@
+name: deploy
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: build
+        run: ./gradlew build
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions.checkout@v2
+
+      - name: set up JDK
+      - uses: actions.setup-java@v1
+        with:
+          java-version: 16
+
+      - name: run tests
+        run: ./gradlew test

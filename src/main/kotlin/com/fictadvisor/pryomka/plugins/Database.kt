@@ -21,6 +21,6 @@ fun initDB() {
 }
 
 fun createTables() = transaction {
-    SchemaUtils.setSchema(Schema("pryemka"))
+    SchemaUtils.setSchema(Schema("public"))
     SchemaUtils.create(Users, Documents)
 }

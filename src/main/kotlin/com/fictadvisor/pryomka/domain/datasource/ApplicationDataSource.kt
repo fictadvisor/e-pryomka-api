@@ -7,5 +7,10 @@ import com.fictadvisor.pryomka.domain.models.UserIdentifier
 
 interface ApplicationDataSource {
     suspend fun getApplication(userId: UserIdentifier): Application
-    suspend fun addDocument(userId: UserIdentifier, document: Document, type: DocumentType)
+    suspend fun addDocument(
+        userId: UserIdentifier,
+        document: Document,
+        type: DocumentType,
+        key: DocumentKey,
+    )
 }

@@ -3,6 +3,7 @@ package com.fictadvisor.pryomka.data.datasources
 import com.fictadvisor.pryomka.data.db.Documents
 import com.fictadvisor.pryomka.data.upsert
 import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
+import com.fictadvisor.pryomka.domain.datasource.DocumentKey
 import com.fictadvisor.pryomka.domain.models.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -34,12 +35,14 @@ class ApplicationDataSourceImpl(
         userId: UserIdentifier,
         document: Document,
         type: DocumentType,
+        key: DocumentKey,
     ): Unit = withContext(dispatchers) {
         transaction {
             Documents.upsert {
                 it[Documents.userId] = userId.value
                 it[Documents.path] = document.path.value
                 it[Documents.type] = type
+                it[Documents.key] = key
             }
         }
     }

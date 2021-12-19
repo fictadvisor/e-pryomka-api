@@ -1,0 +1,11 @@
+FROM eclipse-temurin:16
+
+RUN apk update && apk --no-cache add dumb-init
+
+COPY target/*.jar /app.jar
+
+ENV JAVA_OPTS="-noverify"
+
+ENTRYPOINT dumb-init -- java $JAVA_OPTS \
+ -Djava.security.egd=file:/dev/./urandom \
+ -jar /app.jar

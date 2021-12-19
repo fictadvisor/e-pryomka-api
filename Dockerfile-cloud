@@ -1,4 +1,4 @@
-FROM eclipse-temurin:16
+FROM eclipse-temurin:16-alpine
 
 RUN apk update && apk --no-cache add dumb-init
 

@@ -14,14 +14,29 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class UserDataSourceImpl(
     private val dispatchers: CoroutineDispatcher = Dispatchers.IO,
 ) : UserDataSource {
-    override suspend fun findUser(id: UserIdentifier): User = withContext(dispatchers) {
+    override suspend fun findUser(id: UserIdentifier): User? = withContext(dispatchers) {
         transaction {
-            val resultRow = Users.select { Users.id eq id.value }.single()
-            User(
-                UserIdentifier(resultRow[Users.id]),
-                resultRow[Users.name],
-                resultRow[Users.role],
-            )
+            val resultRow = Users.select { Users.id eq id.value }.singleOrNull()
+            resultRow?.let {
+                User(
+                    UserIdentifier(resultRow[Users.id]),
+                    resultRow[Users.name],
+                    resultRow[Users.role],
+                )
+            }
+        }
+    }
+
+    override suspend fun findUser(name: String): User? = withContext(dispatchers) {
+        transaction {
+            val resultRow = Users.select { Users.name eq name }.singleOrNull()
+            resultRow?.let {
+                User(
+                    UserIdentifier(resultRow[Users.id]),
+                    resultRow[Users.name],
+                    resultRow[Users.role],
+                )
+            }
         }
     }
 

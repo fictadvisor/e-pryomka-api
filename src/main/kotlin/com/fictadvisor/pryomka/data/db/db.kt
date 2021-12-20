@@ -17,6 +17,7 @@ object Documents : Table() {
     val userId = uuid("user_id") references Users.id
     val path = varchar("path", 512)
     val type = enumeration("type", DocumentType::class)
+    val key = varchar("key", 128)
 
     override val primaryKey = PrimaryKey(id)
 

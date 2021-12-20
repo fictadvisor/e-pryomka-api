@@ -6,6 +6,8 @@ import com.fictadvisor.pryomka.domain.models.Path
 import com.fictadvisor.pryomka.domain.models.UserIdentifier
 import io.ktor.routing.*
 import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -55,8 +57,17 @@ fun Application.configureRouting() {
         }
 
         get("/") {
-            println("HERE")
             call.respond(mapOf("Test" to "Kek"))
+        }
+
+        authenticate {
+            get("/hello") {
+                val userId = call.principal<UserIdPrincipal>()?.name
+                val user = Provider.findUserUseCase.findById(
+                    UserIdentifier(UUID.fromString(userId))
+                )
+                call.respondText("Hello, ${user}!")
+            }
         }
     }
 }

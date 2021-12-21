@@ -1,4 +1,4 @@
-package com.fictadvisor.pryomka.plugins
+package com.fictadvisor.pryomka
 
 import com.fictadvisor.pryomka.data.datasources.ApplicationDataSourceImpl
 import com.fictadvisor.pryomka.data.datasources.FsDocumentDataSource
@@ -28,6 +28,6 @@ object Provider {
     private val userDataSource: UserDataSource by lazy { UserDataSourceImpl() }
     private val applicationDataSource: ApplicationDataSource by lazy { ApplicationDataSourceImpl() }
     private val documentDataSource: DocumentDataSource by lazy {
-        FsDocumentDataSource(System.getenv("SECRET"))
+        FsDocumentDataSource(Environment.SECRET)
     }
 }

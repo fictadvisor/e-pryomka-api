@@ -34,7 +34,12 @@ class FsDocumentDataSource(
             init(Cipher.ENCRYPT_MODE, documentKey)
         }
 
-        val fileOutput = FileOutputStream(document.path.value).buffered(512)
+        val file = File(document.path.value)
+        if (!file.parentFile.exists()) {
+            file.parentFile.mkdirs()
+        }
+
+        val fileOutput = FileOutputStream(file).buffered(512)
         fileOutput.write(cipher.iv.size)
         fileOutput.write(cipher.iv)
 

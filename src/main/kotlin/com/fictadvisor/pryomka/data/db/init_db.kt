@@ -1,8 +1,6 @@
-package com.fictadvisor.pryomka.plugins
+package com.fictadvisor.pryomka.data.db
 
 import com.fictadvisor.pryomka.Environment
-import com.fictadvisor.pryomka.data.db.Documents
-import com.fictadvisor.pryomka.data.db.Users
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
@@ -26,7 +24,7 @@ fun initDB() {
     createTables()
 }
 
-fun createTables() = transaction {
+private fun createTables() = transaction {
     SchemaUtils.setSchema(Schema(Environment.DB_SCHEMA))
     SchemaUtils.create(Users, Documents)
 }

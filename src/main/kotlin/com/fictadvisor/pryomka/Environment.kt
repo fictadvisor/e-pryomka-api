@@ -14,6 +14,7 @@ object Environment {
     val DB_PASSWORD get() = env["DB_PASSWORD"] ?: error("DB_PASSWORD not set")
     val DB_NAME get() = env["DB_NAME"] ?: error("DB_NAME not set")
     val DB_SCHEMA get() = env["DB_SCHEMA"] ?: "public"
+    val UPLOADS_DIR get() = env["UPLOADS_DIR"] ?: "uploads"
 
     // Server
     val PORT get() = env["PORT"]?.toInt() ?: 8080

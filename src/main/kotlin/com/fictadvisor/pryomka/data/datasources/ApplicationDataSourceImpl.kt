@@ -1,49 +1,56 @@
 package com.fictadvisor.pryomka.data.datasources
 
+import com.fictadvisor.pryomka.data.db.Applications
 import com.fictadvisor.pryomka.data.db.Documents
-import com.fictadvisor.pryomka.data.upsert
 import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
-import com.fictadvisor.pryomka.domain.datasource.DocumentKey
 import com.fictadvisor.pryomka.domain.models.*
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import java.util.*
 
 class ApplicationDataSourceImpl(
     private val dispatchers: CoroutineDispatcher = Dispatchers.IO,
 ) : ApplicationDataSource {
-    override suspend fun getApplication(userId: UserIdentifier): Application = withContext(dispatchers) {
-        transaction {
-            val documents = mutableMapOf<DocumentType, Document>()
-            val query = Documents.select { Documents.userId eq userId.value }
+    override suspend fun getApplication(userId: UserIdentifier): Application? {
+        val application = newSuspendedTransaction(dispatchers) {
+            Applications.select { Applications.userId eq userId.value }
+                .limit(1)
+                .map {
+                    Application(
+                        id = ApplicationIdentifier(it[Applications.id]),
+                        userId = userId,
+                        documents = listOf(),
+                        status = it[Applications.status]
+                    )
+                }.firstOrNull()
+        } ?: return null
 
-            query.forEach { row ->
-                val path = Path(row[Documents.path])
-                val doc = Document(path)
-                val type = row[Documents.type]
-
-                documents[type] = doc
-            }
-
-            Application(userId, documents)
+        val documents = newSuspendedTransaction(dispatchers) {
+            Documents.select { Documents.applicationId eq application.id.value }
+                .map { it[Documents.type] }
         }
+
+        return application + documents
     }
 
-    override suspend fun addDocument(
-        userId: UserIdentifier,
-        document: Document,
-        type: DocumentType,
-        key: DocumentKey,
-    ): Unit = withContext(dispatchers) {
-        transaction {
-            Documents.upsert {
-                it[Documents.userId] = userId.value
-                it[Documents.path] = document.path.value
-                it[Documents.type] = type
-                it[Documents.key] = key
-            }
+    override suspend fun createApplication(
+        userId: UserIdentifier
+    ): Application = newSuspendedTransaction(dispatchers) {
+        val application = Application(
+            id = ApplicationIdentifier(UUID.randomUUID()),
+            userId = userId,
+            documents = listOf(),
+            status = Application.Status.Pending
+        )
+
+        Applications.insert {
+            it[Applications.id] = application.id.value
+            it[Applications.userId] = application.userId.value
+            it[Applications.status] = application.status
         }
+
+        application
     }
 }

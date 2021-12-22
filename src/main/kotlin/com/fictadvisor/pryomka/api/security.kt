@@ -25,7 +25,7 @@ fun Application.configureSecurity() {
         basic(AUTH_OPERATOR) {
             validate { credentials ->
                 val user = Provider.findUserUseCase.findByName(credentials.name)
-                    ?: Provider.createUserUseCase(credentials.name)
+                    ?: return@validate null
 
                 UserIdPrincipal(user.id.value.toString()).takeIf {
                     user.role == User.Role.Operator || user.role == User.Role.Admin
@@ -36,7 +36,7 @@ fun Application.configureSecurity() {
         basic(AUTH_ADMIN) {
             validate { credentials ->
                 val user = Provider.findUserUseCase.findByName(credentials.name)
-                    ?: Provider.createUserUseCase(credentials.name)
+                    ?: return@validate null
 
                 UserIdPrincipal(user.id.value.toString()).takeIf {
                     user.role == User.Role.Operator

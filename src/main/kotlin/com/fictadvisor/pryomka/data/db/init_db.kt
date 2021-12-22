@@ -26,5 +26,9 @@ fun initDB() {
 
 private fun createTables() = transaction {
     SchemaUtils.setSchema(Schema(Environment.DB_SCHEMA))
-    SchemaUtils.create(Users, Documents)
+    SchemaUtils.create(
+        Users,
+        Documents,
+        Applications,
+    )
 }

@@ -15,7 +15,7 @@ import io.ktor.routing.*
 import kotlinx.coroutines.async
 import java.io.InputStream
 
-fun Route.applicationRouters() {
+fun Route.myApplicationRouters() {
     get("/applications/my") {
         val userId = call.userId ?: run {
             call.respond(HttpStatusCode.Unauthorized)

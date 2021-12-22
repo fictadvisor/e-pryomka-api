@@ -7,9 +7,11 @@ data class Application(
     val status: Status,
 ) {
     enum class Status {
+        Preparing,
         Pending,
         Approved,
         Rejected,
+        Cancelled,
     }
 
     operator fun plus(documents: List<DocumentType>) = copy(

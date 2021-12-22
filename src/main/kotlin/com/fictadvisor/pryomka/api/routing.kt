@@ -1,6 +1,6 @@
 package com.fictadvisor.pryomka.api
 
-import com.fictadvisor.pryomka.api.routes.applicationRouters
+import com.fictadvisor.pryomka.api.routes.myApplicationRouters
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.response.*
@@ -13,7 +13,7 @@ fun Application.configureRouting() {
         }
 
         authenticate(AUTH_ENTRANT) {
-            applicationRouters()
+            myApplicationRouters()
         }
 
         get("/") {

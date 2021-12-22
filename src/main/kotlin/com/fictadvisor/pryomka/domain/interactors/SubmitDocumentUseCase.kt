@@ -35,6 +35,9 @@ class SubmitDocumentUseCaseImpl(
         } else {
             metadataDataSource.replace(document)
 
+            /** Don't delete existing document if it has same path,
+             *  because it was already overwritten.
+             */
             if (existingDoc.path != document.path) contentDataSource.delete(existingDoc)
         }
     }

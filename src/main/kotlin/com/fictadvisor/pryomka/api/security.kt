@@ -39,7 +39,7 @@ fun Application.configureSecurity() {
                     ?: return@validate null
 
                 UserIdPrincipal(user.id.value.toString()).takeIf {
-                    user.role == User.Role.Operator
+                    user.role == User.Role.Admin
                 }
             }
         }

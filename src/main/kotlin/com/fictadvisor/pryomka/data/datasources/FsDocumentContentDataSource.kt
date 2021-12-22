@@ -1,8 +1,8 @@
 package com.fictadvisor.pryomka.data.datasources
 
-import com.fictadvisor.pryomka.domain.datasource.DocumentDataSource
-import com.fictadvisor.pryomka.domain.datasource.DocumentKey
-import com.fictadvisor.pryomka.domain.models.Document
+import com.fictadvisor.pryomka.domain.datasource.DocumentContentDataSource
+import com.fictadvisor.pryomka.domain.models.DocumentKey
+import com.fictadvisor.pryomka.domain.models.DocumentMetadata
 import kotlinx.coroutines.*
 import java.io.*
 import java.util.*
@@ -12,10 +12,10 @@ import javax.crypto.spec.SecretKeySpec
 import kotlin.io.use
 
 @Suppress("BlockingMethodInNonBlockingContext")
-class FsDocumentDataSource(
+class FsDocumentContentDataSource(
     private val secret: String,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : DocumentDataSource {
+) : DocumentContentDataSource {
     private val secretKey by lazy {
         val decodedKey = Base64.getDecoder().decode(secret)
         SecretKeySpec(decodedKey, 0, decodedKey.size, KEY_GEN_ALGORITHM)
@@ -25,8 +25,8 @@ class FsDocumentDataSource(
         it.init(KEY_SIZE)
     }
 
-    override suspend fun saveDocument(
-        document: Document,
+    override suspend fun save(
+        document: DocumentMetadata,
         data: InputStream,
     ): DocumentKey = withContext(dispatcher) {
         val documentKey = keyGen.generateKey()
@@ -34,7 +34,12 @@ class FsDocumentDataSource(
             init(Cipher.ENCRYPT_MODE, documentKey)
         }
 
-        val fileOutput = FileOutputStream(document.path.value).buffered(512)
+        val file = File(document.path.value)
+        if (!file.parentFile.exists()) {
+            file.parentFile.mkdirs()
+        }
+
+        val fileOutput = FileOutputStream(file).buffered(512)
         fileOutput.write(cipher.iv.size)
         fileOutput.write(cipher.iv)
 
@@ -58,8 +63,8 @@ class FsDocumentDataSource(
         }
     }
 
-    override suspend fun getDocument(
-        document: Document,
+    override suspend fun get(
+        document: DocumentMetadata,
         key: DocumentKey,
     ): InputStream = withContext(Dispatchers.IO) {
         val documentKey = decryptKey(key)
@@ -88,6 +93,10 @@ class FsDocumentDataSource(
 
         val decryptedKey = cipher.doFinal(encryptedKey)
         return SecretKeySpec(decryptedKey, 0, decryptedKey.size, KEY_GEN_ALGORITHM)
+    }
+
+    override suspend fun delete(document: DocumentMetadata) {
+        File(document.path.value).delete()
     }
 
     companion object {

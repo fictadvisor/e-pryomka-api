@@ -1,10 +1,12 @@
-package com.fictadvisor.pryomka.plugins
+package com.fictadvisor.pryomka
 
 import com.fictadvisor.pryomka.data.datasources.ApplicationDataSourceImpl
-import com.fictadvisor.pryomka.data.datasources.FsDocumentDataSource
+import com.fictadvisor.pryomka.data.datasources.DocumentMetadataDataSourceImpl
+import com.fictadvisor.pryomka.data.datasources.FsDocumentContentDataSource
 import com.fictadvisor.pryomka.data.datasources.UserDataSourceImpl
 import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
-import com.fictadvisor.pryomka.domain.datasource.DocumentDataSource
+import com.fictadvisor.pryomka.domain.datasource.DocumentContentDataSource
+import com.fictadvisor.pryomka.domain.datasource.DocumentMetadataDataSource
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.interactors.*
 
@@ -13,8 +15,12 @@ object Provider {
         GetApplicationUseCaseImpl(applicationDataSource)
     }
 
+    val createApplicationUseCase: CreateApplicationUseCase by lazy {
+        CreateApplicationUseCaseImpl(applicationDataSource)
+    }
+
     val submitDocumentUseCase: SubmitDocumentUseCase by lazy {
-        SubmitDocumentUseCaseImpl(applicationDataSource, documentDataSource)
+        SubmitDocumentUseCaseImpl(documentContentDataSource, documentMetadataDataSource)
     }
 
     val createUserUseCase: CreateUserUseCase by lazy {
@@ -27,7 +33,10 @@ object Provider {
 
     private val userDataSource: UserDataSource by lazy { UserDataSourceImpl() }
     private val applicationDataSource: ApplicationDataSource by lazy { ApplicationDataSourceImpl() }
-    private val documentDataSource: DocumentDataSource by lazy {
-        FsDocumentDataSource(System.getenv("SECRET"))
+    private val documentContentDataSource: DocumentContentDataSource by lazy {
+        FsDocumentContentDataSource(Environment.SECRET)
+    }
+    private val documentMetadataDataSource: DocumentMetadataDataSource by lazy {
+        DocumentMetadataDataSourceImpl()
     }
 }

@@ -1,6 +1,6 @@
 package com.fictadvisor.pryomka
 
-import com.fictadvisor.pryomka.data.datasources.FsDocumentDataSource
+import com.fictadvisor.pryomka.data.datasources.FsDocumentContentDataSource
 import java.security.SecureRandom
 import java.util.*
 
@@ -10,7 +10,7 @@ import java.util.*
  **/
 fun main() {
     val random = SecureRandom()
-    val bytes = ByteArray(FsDocumentDataSource.KEY_SIZE / 8)
+    val bytes = ByteArray(FsDocumentContentDataSource.KEY_SIZE / 8)
     random.nextBytes(bytes)
 
     val secret = Base64.getEncoder().encodeToString(bytes)

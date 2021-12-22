@@ -11,12 +11,8 @@ import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.interactors.*
 
 object Provider {
-    val getApplicationUseCase: GetApplicationUseCase by lazy {
-        GetApplicationUseCaseImpl(applicationDataSource)
-    }
-
-    val createApplicationUseCase: CreateApplicationUseCase by lazy {
-        CreateApplicationUseCaseImpl(applicationDataSource)
+    val applicationUseCase: ApplicationUseCase by lazy {
+        ApplicationUseCaseImpl(applicationDataSource)
     }
 
     val submitDocumentUseCase: SubmitDocumentUseCase by lazy {

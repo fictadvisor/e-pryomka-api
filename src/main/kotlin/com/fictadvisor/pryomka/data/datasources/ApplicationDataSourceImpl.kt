@@ -7,13 +7,15 @@ import com.fictadvisor.pryomka.domain.models.*
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import java.util.*
 
 class ApplicationDataSourceImpl(
     private val dispatchers: CoroutineDispatcher = Dispatchers.IO,
 ) : ApplicationDataSource {
-    override suspend fun getApplication(userId: UserIdentifier): Application? {
+    override suspend fun getByUserId(userId: UserIdentifier): Application? {
         val application = newSuspendedTransaction(dispatchers) {
             Applications.select { Applications.userId eq userId.value }
                 .limit(1)
@@ -35,7 +37,43 @@ class ApplicationDataSourceImpl(
         return application + documents
     }
 
-    override suspend fun createApplication(
+    override suspend fun getById(applicationId: ApplicationIdentifier): Application? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAll(): List<Application> {
+        val applicationsDef = suspendedTransactionAsync(dispatchers) {
+            Applications.selectAll()
+                .map {
+                    Application(
+                        id = ApplicationIdentifier(it[Applications.id]),
+                        userId = UserIdentifier(it[Applications.userId]),
+                        documents = listOf(),
+                        status = it[Applications.status],
+                    )
+                }
+        }
+
+        val documentsDef = suspendedTransactionAsync(dispatchers) {
+            Documents.selectAll()
+                .map {
+                    DocumentMetadata(
+                        applicationId = ApplicationIdentifier(it[Documents.applicationId]),
+                        path = Path(it[Documents.path]),
+                        type = it[Documents.type],
+                        key = it[Documents.key],
+                    )
+                }
+        }
+
+        val map = documentsDef.await().groupBy { it.applicationId }
+
+        return applicationsDef.await().map { application ->
+            application.copy(documents = map[application.id]?.map { it.type } ?: emptyList())
+        }
+    }
+
+    override suspend fun create(
         userId: UserIdentifier
     ): Application = newSuspendedTransaction(dispatchers) {
         val application = Application(

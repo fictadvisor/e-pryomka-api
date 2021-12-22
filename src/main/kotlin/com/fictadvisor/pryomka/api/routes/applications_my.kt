@@ -15,13 +15,13 @@ import io.ktor.routing.*
 import kotlinx.coroutines.async
 import java.io.InputStream
 
-fun Route.myApplicationRouters() {
+fun Route.myApplicationsRouters() {
     get("/applications/my") {
         val userId = call.userId ?: run {
             call.respond(HttpStatusCode.Unauthorized)
             return@get
         }
-        val application = Provider.getApplicationUseCase(userId) ?: run {
+        val application = Provider.applicationUseCase.getByUserId(userId) ?: run {
             call.respond(HttpStatusCode.NotFound)
             return@get
         }
@@ -37,8 +37,8 @@ fun Route.myApplicationRouters() {
         var stream: InputStream? = null
         var fileName: String? = null
 
-        val application = async {
-            Provider.getApplicationUseCase(userId) ?: Provider.createApplicationUseCase(userId)
+        val applicationDef = async {
+            Provider.applicationUseCase.getByUserId(userId) ?: Provider.applicationUseCase.create(userId)
         }
 
         try {
@@ -54,7 +54,7 @@ fun Route.myApplicationRouters() {
             }}
         } catch (e: IllegalStateException) { /* nothing */ }
 
-        val document = application.await().let { application ->
+        val document = applicationDef.await().let { application ->
             val type = fileType ?: run {
                 call.respond(HttpStatusCode.BadRequest, "File type is not provided")
                 return@post

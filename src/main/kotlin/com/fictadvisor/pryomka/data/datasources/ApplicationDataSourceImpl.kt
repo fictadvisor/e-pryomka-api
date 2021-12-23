@@ -9,7 +9,6 @@ import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 class ApplicationDataSourceImpl(
@@ -43,7 +42,7 @@ class ApplicationDataSourceImpl(
 
     override suspend fun getAll(): List<Application> {
 
-        val applicationsDef = transaction {
+        val applicationsDef = suspendedTransactionAsync(dispatchers) {
             Applications.selectAll()
                 .map {
                     Application(
@@ -55,7 +54,9 @@ class ApplicationDataSourceImpl(
                 }
         }
 
-        val documentsDef = transaction {
+        val documentsDef = suspendedTransactionAsync(dispatchers) {
+            SchemaUtils.setSchema(Schema(Environment.DB_SCHEMA))
+
             Documents.select { Documents.type eq DocumentType.Photo }
                 .map {
                     DocumentMetadata(
@@ -67,9 +68,9 @@ class ApplicationDataSourceImpl(
                 }
         }
 
-        val map = documentsDef.groupBy { it.applicationId }
+        val map = documentsDef.await().groupBy { it.applicationId }
 
-        return applicationsDef.map { application ->
+        return applicationsDef.await().map { application ->
             application.copy(documents = map[application.id]?.map { it.type } ?: emptyList())
         }
     }

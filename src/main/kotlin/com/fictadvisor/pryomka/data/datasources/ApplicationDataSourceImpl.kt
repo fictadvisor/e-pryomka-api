@@ -1,15 +1,15 @@
 package com.fictadvisor.pryomka.data.datasources
 
+import com.fictadvisor.pryomka.Environment
 import com.fictadvisor.pryomka.data.db.Applications
 import com.fictadvisor.pryomka.data.db.Documents
 import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
 import com.fictadvisor.pryomka.domain.models.*
 import kotlinx.coroutines.*
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 class ApplicationDataSourceImpl(
@@ -42,7 +42,8 @@ class ApplicationDataSourceImpl(
     }
 
     override suspend fun getAll(): List<Application> {
-        val applicationsDef = suspendedTransactionAsync(dispatchers) {
+
+        val applicationsDef = transaction {
             Applications.selectAll()
                 .map {
                     Application(
@@ -54,8 +55,8 @@ class ApplicationDataSourceImpl(
                 }
         }
 
-        val documentsDef = suspendedTransactionAsync(dispatchers) {
-            Documents.selectAll()
+        val documentsDef = transaction {
+            Documents.select { Documents.type eq DocumentType.Photo }
                 .map {
                     DocumentMetadata(
                         applicationId = ApplicationIdentifier(it[Documents.applicationId]),
@@ -66,9 +67,9 @@ class ApplicationDataSourceImpl(
                 }
         }
 
-        val map = documentsDef.await().groupBy { it.applicationId }
+        val map = documentsDef.groupBy { it.applicationId }
 
-        return applicationsDef.await().map { application ->
+        return applicationsDef.map { application ->
             application.copy(documents = map[application.id]?.map { it.type } ?: emptyList())
         }
     }

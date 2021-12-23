@@ -70,7 +70,7 @@ fun Route.myApplicationsRouters() {
                     type
                 ),
                 type = type,
-                key = ""
+                key = "",
             )
         }
 

@@ -17,6 +17,7 @@ class FsDocumentContentDataSource(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : DocumentContentDataSource {
     private val secretKey by lazy {
+        println(secret)
         val decodedKey = Base64.getDecoder().decode(secret)
         SecretKeySpec(decodedKey, 0, decodedKey.size, KEY_GEN_ALGORITHM)
     }
@@ -65,9 +66,8 @@ class FsDocumentContentDataSource(
 
     override suspend fun get(
         document: DocumentMetadata,
-        key: DocumentKey,
     ): InputStream = withContext(Dispatchers.IO) {
-        val documentKey = decryptKey(key)
+        val documentKey = decryptKey(document.key)
         val fileStream = FileInputStream(document.path.value).buffered(512)
         val ivSize = fileStream.read()
         val iv = IvParameterSpec(fileStream.readNBytes(ivSize))

@@ -15,6 +15,10 @@ object Provider {
         ApplicationUseCaseImpl(applicationDataSource)
     }
 
+    val getDocumentsUseCase: GetDocumentsUseCase by lazy {
+        GetDocumentsUseCaseImpl(documentContentDataSource, documentMetadataDataSource)
+    }
+
     val submitDocumentUseCase: SubmitDocumentUseCase by lazy {
         SubmitDocumentUseCaseImpl(documentContentDataSource, documentMetadataDataSource)
     }

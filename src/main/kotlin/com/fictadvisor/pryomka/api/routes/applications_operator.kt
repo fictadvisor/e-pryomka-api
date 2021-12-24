@@ -10,7 +10,9 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import java.nio.file.Files
 import java.util.*
+
 
 fun Route.operatorApplicationsRouters() {
     get("/applications") {
@@ -46,7 +48,18 @@ fun Route.operatorApplicationsRouters() {
             return@get
         }
 
-        Provider.getDocumentsUseCase.get(ApplicationIdentifier(id), type).use {
+        val (metadata, content) = Provider.getDocumentsUseCase.get(ApplicationIdentifier(id), type) ?: run {
+            call.respond(HttpStatusCode.NotFound)
+            return@get
+        }
+
+        call.response.header(
+            HttpHeaders.ContentDisposition,
+            ContentDisposition.Attachment.withParameter(ContentDisposition.Parameters.FileName, metadata.path.value.substringAfterLast("/"))
+                .toString()
+        )
+
+        content.use {
             call.respondOutputStream { it.copyTo(this) }
         }
     }

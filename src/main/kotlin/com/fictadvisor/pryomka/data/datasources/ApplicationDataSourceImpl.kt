@@ -55,8 +55,6 @@ class ApplicationDataSourceImpl(
         }
 
         val documentsDef = suspendedTransactionAsync(dispatchers) {
-            SchemaUtils.setSchema(Schema(Environment.DB_SCHEMA))
-
             Documents.select { Documents.type eq DocumentType.Photo }
                 .map {
                     DocumentMetadata(

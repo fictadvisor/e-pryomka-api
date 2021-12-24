@@ -11,7 +11,9 @@ data class Application(
         Pending,
         Approved,
         Rejected,
-        Cancelled,
+        Cancelled;
+
+        val isTerminal get() = this != Preparing || this != Pending
     }
 
     operator fun plus(documents: List<DocumentType>) = copy(

@@ -11,3 +11,9 @@ data class User(
         Admin,
     }
 }
+
+fun User.Role.canApply(status: Application.Status) = when (this) {
+    User.Role.Entrant -> status == Application.Status.Cancelled
+    User.Role.Operator -> status == Application.Status.Rejected || status == Application.Status.Approved
+    User.Role.Admin -> true
+}

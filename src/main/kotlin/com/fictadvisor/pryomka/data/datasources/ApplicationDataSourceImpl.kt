@@ -23,7 +23,7 @@ class ApplicationDataSourceImpl(
                         id = ApplicationIdentifier(it[Applications.id]),
                         userId = userId,
                         documents = listOf(),
-                        status = it[Applications.status]
+                        status = it[Applications.status],
                     )
                 }.firstOrNull()
         } ?: return null
@@ -37,7 +37,25 @@ class ApplicationDataSourceImpl(
     }
 
     override suspend fun getById(applicationId: ApplicationIdentifier): Application? {
-        TODO("Not yet implemented")
+        val application = newSuspendedTransaction(dispatchers) {
+            Applications.select { Applications.id eq applicationId.value }
+                .limit(1)
+                .map {
+                    Application(
+                        id = applicationId,
+                        userId = UserIdentifier(it[Applications.userId]),
+                        documents = listOf(),
+                        status = it[Applications.status],
+                    )
+                }.firstOrNull()
+        } ?: return null
+
+        val documents = newSuspendedTransaction(dispatchers) {
+            Documents.select { Documents.applicationId eq application.id.value }
+                .map { it[Documents.type] }
+        }
+
+        return application + documents
     }
 
     override suspend fun getAll(): List<Application> {
@@ -90,5 +108,13 @@ class ApplicationDataSourceImpl(
         }
 
         application
+    }
+
+    override suspend fun changeStatus(
+        applicationId: ApplicationIdentifier,
+        status: Application.Status,
+        statusMsg: String?,
+    ) {
+
     }
 }

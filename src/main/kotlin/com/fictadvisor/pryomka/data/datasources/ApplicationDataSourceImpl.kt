@@ -21,7 +21,7 @@ class ApplicationDataSourceImpl(
                     Application(
                         id = ApplicationIdentifier(it[Applications.id]),
                         userId = userId,
-                        documents = listOf(),
+                        documents = setOf(),
                         status = it[Applications.status]
                     )
                 }.firstOrNull()
@@ -32,7 +32,7 @@ class ApplicationDataSourceImpl(
                 .map { it[Documents.type] }
         }
 
-        return application + documents
+        return application + documents.toSet()
     }
 
     override suspend fun createApplication(
@@ -41,7 +41,7 @@ class ApplicationDataSourceImpl(
         val application = Application(
             id = ApplicationIdentifier(UUID.randomUUID()),
             userId = userId,
-            documents = listOf(),
+            documents = setOf(),
             status = Application.Status.Pending
         )
 

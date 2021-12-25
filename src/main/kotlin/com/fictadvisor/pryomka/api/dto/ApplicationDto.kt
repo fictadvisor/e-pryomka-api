@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 data class ApplicationDto(
     val id: String,
     val status: Application.Status,
-    val documents: List<DocumentType>,
+    val documents: Set<DocumentType>,
 )

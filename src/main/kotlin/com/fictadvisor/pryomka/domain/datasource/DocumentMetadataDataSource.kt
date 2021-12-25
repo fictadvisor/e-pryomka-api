@@ -1,6 +1,8 @@
 package com.fictadvisor.pryomka.domain.datasource
 
-import com.fictadvisor.pryomka.domain.models.*
+import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
+import com.fictadvisor.pryomka.domain.models.DocumentMetadata
+import com.fictadvisor.pryomka.domain.models.DocumentType
 
 interface DocumentMetadataDataSource {
     suspend fun add(document: DocumentMetadata)

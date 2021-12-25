@@ -1,9 +1,9 @@
 package com.fictadvisor.pryomka.api
 
-import com.fictadvisor.pryomka.domain.models.User
 import com.fictadvisor.pryomka.Provider
-import io.ktor.auth.*
+import com.fictadvisor.pryomka.domain.models.User
 import io.ktor.application.*
+import io.ktor.auth.*
 
 const val AUTH_GENERAL = "auth_general"
 const val AUTH_ENTRANT = "entrant"

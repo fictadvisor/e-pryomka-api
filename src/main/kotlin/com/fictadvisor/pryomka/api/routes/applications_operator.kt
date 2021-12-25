@@ -1,18 +1,15 @@
 package com.fictadvisor.pryomka.api.routes
 
 import com.fictadvisor.pryomka.Provider
-import com.fictadvisor.pryomka.api.dto.ChangeApplicationStatusDto
 import com.fictadvisor.pryomka.api.mappers.toDto
-import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
+import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
+import com.fictadvisor.pryomka.domain.models.DocumentType
 import com.fictadvisor.pryomka.utils.toUUIDOrNull
-import com.fictadvisor.pryomka.utils.userId
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import java.nio.file.Files
-import java.util.*
 
 
 fun Route.operatorApplicationsRouters() {

@@ -35,6 +35,10 @@ object Provider {
         FindUserUseCaseImpl(userDataSource)
     }
 
+    val operatorManagementUseCases: OperatorManagementUseCases by lazy {
+        OperatorManagementUseCaseImpl(userDataSource)
+    }
+
     private val userDataSource: UserDataSource by lazy { UserDataSourceImpl() }
     private val applicationDataSource: ApplicationDataSource by lazy { ApplicationDataSourceImpl() }
     private val documentContentDataSource: DocumentContentDataSource by lazy {

@@ -6,5 +6,7 @@ import com.fictadvisor.pryomka.domain.models.UserIdentifier
 interface UserDataSource {
     suspend fun findUser(id: UserIdentifier): User?
     suspend fun findUser(name: String): User?
+    suspend fun findByRole(role: User.Role): List<User>
     suspend fun addUser(user: User)
+    suspend fun deleteUser(user: User)
 }

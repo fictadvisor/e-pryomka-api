@@ -12,10 +12,7 @@ import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.util.*
 import javax.crypto.BadPaddingException
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class FsDocumentContentDataSourceTest {
     @Rule
@@ -96,7 +93,7 @@ class FsDocumentContentDataSourceTest {
         val file = File(metadata.path.value)
 
         // THEN
-        assertNotEquals(content, file.readText())
+        assertFalse(file.readText().contains(content))
     }
 
     @Test

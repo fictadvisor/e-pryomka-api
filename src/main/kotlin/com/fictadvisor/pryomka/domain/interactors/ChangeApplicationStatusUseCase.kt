@@ -7,27 +7,28 @@ import com.fictadvisor.pryomka.domain.models.*
 interface ChangeApplicationStatusUseCase {
     suspend fun changeStatus(
         applicationId: ApplicationIdentifier,
-        userIdentifier: UserIdentifier,
+        userId: UserIdentifier,
         newStatus: Application.Status,
         statusMsg: String?,
     )
 }
 
+// Todo add Result class + Domain Exception class with error codes
 class ChangeApplicationStatusUseCaseImpl(
     private val userDataSource: UserDataSource,
     private val applicationDataSource: ApplicationDataSource,
-) {
-    suspend fun changeStatus(
+) : ChangeApplicationStatusUseCase {
+    override suspend fun changeStatus(
         applicationId: ApplicationIdentifier,
-        userIdentifier: UserIdentifier,
+        userId: UserIdentifier,
         newStatus: Application.Status,
         statusMsg: String?,
     ) {
-        val user = userDataSource.findUser(userIdentifier) ?: error("")
-        val application = applicationDataSource.getById(applicationId) ?: error("")
+        val user = userDataSource.findUser(userId) ?: unauthorized()
+        val application = applicationDataSource.get(applicationId, userId) ?: notfound("Can't find application")
         val msg = statusMsg.takeIf { newStatus == Application.Status.Rejected }
 
-        if (!user.role.canApply(newStatus)) error("")
+        if (!user.role.canApply(newStatus)) permissionDenied("Can't apply given status")
 
         when (user.role) {
             User.Role.Entrant -> changeStatusEntrant(application, newStatus)
@@ -40,7 +41,7 @@ class ChangeApplicationStatusUseCaseImpl(
         application: Application,
         newStatus: Application.Status,
     ) {
-        if (application.status.isTerminal) error("")
+        if (application.status.isTerminal) permissionDenied("Can't apply given status")
         applicationDataSource.changeStatus(application.id, newStatus, null)
     }
 
@@ -49,7 +50,7 @@ class ChangeApplicationStatusUseCaseImpl(
         newStatus: Application.Status,
         statusMsg: String?,
     ) {
-        if (application.status != Application.Status.Pending) error("")
+        if (application.status != Application.Status.Pending) permissionDenied("Can't apply given status")
         applicationDataSource.changeStatus(application.id, newStatus, statusMsg)
     }
 

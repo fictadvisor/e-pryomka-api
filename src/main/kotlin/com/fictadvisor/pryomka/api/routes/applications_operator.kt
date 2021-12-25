@@ -3,9 +3,8 @@ package com.fictadvisor.pryomka.api.routes
 import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.dto.ChangeApplicationStatusDto
 import com.fictadvisor.pryomka.api.mappers.toDto
+import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
-import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
-import com.fictadvisor.pryomka.domain.models.DocumentType
 import com.fictadvisor.pryomka.utils.toUUIDOrNull
 import com.fictadvisor.pryomka.utils.userId
 import io.ktor.application.*
@@ -67,19 +66,5 @@ fun Route.operatorApplicationsRouters() {
         content.use {
             call.respondOutputStream { it.copyTo(this) }
         }
-    }
-
-    put<ChangeApplicationStatusDto>("/applications/{id}") { changeStatusDto ->
-        val id = call.parameters["id"]?.toUUIDOrNull() ?: run {
-            call.respond(HttpStatusCode.BadRequest, "Invalid application id")
-            return@put
-        }
-
-        val userId = call.userId ?: run {
-            call.respond(HttpStatusCode.Unauthorized)
-            return@put
-        }
-
-        Provider.applicationUseCase.changeStatus()
     }
 }

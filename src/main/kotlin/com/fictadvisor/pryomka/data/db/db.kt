@@ -17,7 +17,7 @@ object Applications : Table() {
     val id = uuid("id").autoGenerate()
     val userId = uuid("user_id") references Users.id
     val status = enumeration("status", Application.Status::class)
-    val statusMsg = varchar("status_msg", 256)
+    val statusMsg = varchar("status_msg", 256).nullable().default(null)
 
     override val primaryKey = PrimaryKey(id)
 }

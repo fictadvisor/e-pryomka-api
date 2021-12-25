@@ -1,5 +1,7 @@
 package com.fictadvisor.pryomka.api
 
+import com.fictadvisor.pryomka.api.routes.adminApplicationsRouters
+import com.fictadvisor.pryomka.api.routes.generalApplicationsRouters
 import com.fictadvisor.pryomka.api.routes.myApplicationsRouters
 import com.fictadvisor.pryomka.api.routes.operatorApplicationsRouters
 import io.ktor.application.*
@@ -9,9 +11,12 @@ import io.ktor.routing.*
 
 fun Application.configureRouting() {
     routing {
+        authenticate(AUTH_GENERAL) {
+            generalApplicationsRouters()
+        }
+
         authenticate(AUTH_ADMIN) {
-            get("/operators") {}
-            post("/operators") {}
+            adminApplicationsRouters()
         }
 
         authenticate(AUTH_OPERATOR) {
@@ -19,8 +24,6 @@ fun Application.configureRouting() {
         }
 
         authenticate(AUTH_ENTRANT) {
-            put("/applicatoins/my") {}
-
             myApplicationsRouters()
         }
 

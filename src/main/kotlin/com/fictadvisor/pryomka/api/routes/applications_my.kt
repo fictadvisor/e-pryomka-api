@@ -1,10 +1,12 @@
 package com.fictadvisor.pryomka.api.routes
 
 import com.fictadvisor.pryomka.api.mappers.toDto
-import com.fictadvisor.pryomka.domain.models.DocumentType
 import com.fictadvisor.pryomka.Provider
-import com.fictadvisor.pryomka.domain.models.DocumentMetadata
+import com.fictadvisor.pryomka.api.dto.ChangeApplicationStatusDto
+import com.fictadvisor.pryomka.domain.models.*
+import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.utils.pathFor
+import com.fictadvisor.pryomka.utils.toUUIDOrNull
 import com.fictadvisor.pryomka.utils.userId
 import io.ktor.application.*
 import io.ktor.http.*
@@ -21,14 +23,21 @@ fun Route.myApplicationsRouters() {
             call.respond(HttpStatusCode.Unauthorized)
             return@get
         }
-        val application = Provider.applicationUseCase.getByUserId(userId) ?: run {
-            call.respond(HttpStatusCode.NotFound)
-            return@get
-        }
-        call.respond(application.toDto())
+        val applications = Provider.applicationUseCase.getByUserId(userId)
+        call.respond(applications.map(Application::toDto))
     }
 
     post("/applications/my") {
+        val userId = call.userId ?: run {
+            call.respond(HttpStatusCode.Unauthorized)
+            return@post
+        }
+
+        val applications = Provider.applicationUseCase.getByUserId(userId)
+        call.respond(applications.map(Application::toDto))
+    }
+
+    post("/applications/my/documents") {
         val userId = call.userId ?: run {
             call.respond(HttpStatusCode.Unauthorized)
             return@post
@@ -38,7 +47,7 @@ fun Route.myApplicationsRouters() {
         var fileName: String? = null
 
         val applicationDef = async {
-            Provider.applicationUseCase.getByUserId(userId) ?: Provider.applicationUseCase.create(userId)
+            Provider.applicationUseCase.getByUserId(userId).first { !it.status.isTerminal }
         }
 
         try {

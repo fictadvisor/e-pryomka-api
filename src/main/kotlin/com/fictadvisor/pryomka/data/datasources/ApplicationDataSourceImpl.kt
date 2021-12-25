@@ -1,6 +1,5 @@
 package com.fictadvisor.pryomka.data.datasources
 
-import com.fictadvisor.pryomka.Environment
 import com.fictadvisor.pryomka.data.db.Applications
 import com.fictadvisor.pryomka.data.db.Documents
 import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
@@ -14,9 +13,9 @@ import java.util.*
 class ApplicationDataSourceImpl(
     private val dispatchers: CoroutineDispatcher = Dispatchers.IO,
 ) : ApplicationDataSource {
-    override suspend fun getByUserId(userId: UserIdentifier): Application? {
+    override suspend fun get(applicationId: ApplicationIdentifier, userId: UserIdentifier): Application? {
         val application = newSuspendedTransaction(dispatchers) {
-            Applications.select { Applications.userId eq userId.value }
+            Applications.select { (Applications.id eq applicationId.value) and (Applications.userId eq userId.value) }
                 .limit(1)
                 .map {
                     Application(
@@ -24,6 +23,7 @@ class ApplicationDataSourceImpl(
                         userId = userId,
                         documents = listOf(),
                         status = it[Applications.status],
+                        statusMsg = it[Applications.statusMsg],
                     )
                 }.firstOrNull()
         } ?: return null
@@ -36,6 +36,39 @@ class ApplicationDataSourceImpl(
         return application + documents
     }
 
+    override suspend fun getByUserId(userId: UserIdentifier): List<Application> {
+        val applications = newSuspendedTransaction(dispatchers) {
+            Applications.select { Applications.userId eq userId.value }
+                .map {
+                    Application(
+                        id = ApplicationIdentifier(it[Applications.id]),
+                        userId = userId,
+                        documents = listOf(),
+                        status = it[Applications.status],
+                        statusMsg = it[Applications.statusMsg],
+                    )
+                }
+        }.takeIf { it.isNotEmpty() } ?: return emptyList()
+
+        val documents = newSuspendedTransaction(dispatchers) {
+            Documents.select { Documents.applicationId inList applications.map { it.id.value } }
+                .map {
+                    DocumentMetadata(
+                        applicationId = ApplicationIdentifier(it[Documents.applicationId]),
+                        path = Path(it[Documents.path]),
+                        type = it[Documents.type],
+                        key = it[Documents.key],
+                    )
+                }
+        }
+
+        val map = documents.groupBy { it.applicationId }
+
+        return applications.map { application ->
+            application.copy(documents = map[application.id]?.map { it.type } ?: emptyList())
+        }
+    }
+
     override suspend fun getById(applicationId: ApplicationIdentifier): Application? {
         val application = newSuspendedTransaction(dispatchers) {
             Applications.select { Applications.id eq applicationId.value }
@@ -46,6 +79,7 @@ class ApplicationDataSourceImpl(
                         userId = UserIdentifier(it[Applications.userId]),
                         documents = listOf(),
                         status = it[Applications.status],
+                        statusMsg = it[Applications.statusMsg],
                     )
                 }.firstOrNull()
         } ?: return null
@@ -68,12 +102,13 @@ class ApplicationDataSourceImpl(
                         userId = UserIdentifier(it[Applications.userId]),
                         documents = listOf(),
                         status = it[Applications.status],
+                        statusMsg = it[Applications.statusMsg],
                     )
                 }
         }
 
         val documentsDef = suspendedTransactionAsync(dispatchers) {
-            Documents.select { Documents.type eq DocumentType.Photo }
+            Documents.selectAll()
                 .map {
                     DocumentMetadata(
                         applicationId = ApplicationIdentifier(it[Documents.applicationId]),
@@ -98,7 +133,7 @@ class ApplicationDataSourceImpl(
             id = ApplicationIdentifier(UUID.randomUUID()),
             userId = userId,
             documents = listOf(),
-            status = Application.Status.Pending
+            status = Application.Status.Pending,
         )
 
         Applications.insert {
@@ -114,7 +149,12 @@ class ApplicationDataSourceImpl(
         applicationId: ApplicationIdentifier,
         status: Application.Status,
         statusMsg: String?,
-    ) {
-
+    ): Unit = newSuspendedTransaction(dispatchers) {
+        Applications.update(
+            where = { Applications.id eq applicationId.value }
+        ) {
+            it[Applications.status] = status
+            it[Applications.statusMsg] = statusMsg
+        }
     }
 }

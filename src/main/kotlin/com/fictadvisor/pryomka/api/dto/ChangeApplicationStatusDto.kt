@@ -1,12 +1,12 @@
 package com.fictadvisor.pryomka.api.dto
 
 import com.fictadvisor.pryomka.domain.models.Application
-import com.fictadvisor.pryomka.domain.models.DocumentType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ApplicationDto(
-    val id: String,
+data class ChangeApplicationStatusDto(
     val status: Application.Status,
-    val documents: Set<DocumentType>,
+    @SerialName("status_msg")
+    val statusMsg: String? = null,
 )

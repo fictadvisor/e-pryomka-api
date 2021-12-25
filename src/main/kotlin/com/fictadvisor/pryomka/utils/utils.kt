@@ -16,3 +16,9 @@ val ApplicationCall.userId: UserIdentifier? get() = principal<UserIdPrincipal>()
 fun Application.pathFor(fileName: String, type: DocumentType) = Path(
     "${Environment.UPLOADS_DIR}/${id.value}/${type}_$fileName"
 )
+
+fun String.toUUIDOrNull() = try {
+    UUID.fromString(this)
+} catch (e: Exception) {
+    null
+}

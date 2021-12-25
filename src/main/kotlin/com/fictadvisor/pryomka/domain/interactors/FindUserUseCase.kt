@@ -10,7 +10,7 @@ interface FindUserUseCase {
 }
 
 class FindUserUseCaseImpl(
-    private val userDataSource: UserDataSource
+    private val userDataSource: UserDataSource,
 ) : FindUserUseCase {
     override suspend fun findByName(name: String): User? = userDataSource.findUser(name)
     override suspend fun findById(id: UserIdentifier): User? = userDataSource.findUser(id)

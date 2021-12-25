@@ -11,12 +11,16 @@ import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.interactors.*
 
 object Provider {
-    val getApplicationUseCase: GetApplicationUseCase by lazy {
-        GetApplicationUseCaseImpl(applicationDataSource)
+    val applicationUseCase: ApplicationUseCase by lazy {
+        ApplicationUseCaseImpl(applicationDataSource)
     }
 
-    val createApplicationUseCase: CreateApplicationUseCase by lazy {
-        CreateApplicationUseCaseImpl(applicationDataSource)
+    val changeApplicationStatusUseCase: ChangeApplicationStatusUseCase by lazy {
+        ChangeApplicationStatusUseCaseImpl(userDataSource, applicationDataSource)
+    }
+
+    val getDocumentsUseCase: GetDocumentsUseCase by lazy {
+        GetDocumentsUseCaseImpl(documentContentDataSource, documentMetadataDataSource)
     }
 
     val submitDocumentUseCase: SubmitDocumentUseCase by lazy {
@@ -29,6 +33,10 @@ object Provider {
 
     val findUserUseCase: FindUserUseCase by lazy {
         FindUserUseCaseImpl(userDataSource)
+    }
+
+    val operatorManagementUseCases: OperatorManagementUseCases by lazy {
+        OperatorManagementUseCaseImpl(userDataSource)
     }
 
     private val userDataSource: UserDataSource by lazy { UserDataSourceImpl() }

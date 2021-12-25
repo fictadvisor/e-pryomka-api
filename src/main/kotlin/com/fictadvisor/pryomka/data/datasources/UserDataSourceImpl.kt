@@ -7,8 +7,10 @@ import com.fictadvisor.pryomka.domain.models.UserIdentifier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class UserDataSourceImpl(
@@ -40,6 +42,19 @@ class UserDataSourceImpl(
         }
     }
 
+    override suspend fun findByRole(
+        role: User.Role
+    ): List<User> = newSuspendedTransaction(dispatchers) {
+        Users.select { Users.role eq role }
+            .map {
+                User(
+                    UserIdentifier(it[Users.id]),
+                    it[Users.name],
+                    it[Users.role],
+                )
+            }
+    }
+
     override suspend fun addUser(user: User): Unit = withContext(dispatchers) {
         transaction {
             Users.insert {
@@ -48,5 +63,9 @@ class UserDataSourceImpl(
                 it[role] = user.role
             }
         }
+    }
+
+    override suspend fun deleteUser(user: User): Unit = newSuspendedTransaction {
+        Users.deleteWhere { Users.id eq user.id.value }
     }
 }

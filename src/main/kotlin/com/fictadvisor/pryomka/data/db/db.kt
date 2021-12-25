@@ -6,6 +6,7 @@ import com.fictadvisor.pryomka.domain.models.User
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.timestamp
 
+// todo replace with Entrants and Operators/Admin table
 object Users : Table() {
     val id = uuid("id").autoGenerate()
     val name = varchar("name", 64)

@@ -40,7 +40,7 @@ fun Route.myApplicationsRouters() {
         val application = applicationRequest.toDomain(userId)
         val applicationUseCase = Provider.applicationUseCase
 
-        applicationUseCase.getByUserId(userId).filter { !it.status.isTerminal }.takeIf { nonTerminated ->
+        applicationUseCase.getByUserId(userId).filter { !it.status.isNegativelyTerminated }.takeIf { nonTerminated ->
             nonTerminated.any { it.funding != application.funding } ||
             nonTerminated.any { it.learningFormat != application.learningFormat } ||
             nonTerminated.any { it.speciality != application.speciality }

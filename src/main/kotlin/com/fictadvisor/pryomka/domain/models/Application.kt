@@ -16,11 +16,12 @@ data class Application(
     enum class Status {
         Preparing,
         Pending,
+        InReview,
         Approved,
         Rejected,
         Cancelled;
 
-        val isTerminal get() = this != Preparing && this != Pending
+        val isNegativelyTerminated get() = this == Cancelled || this == Rejected
     }
 
     enum class Speciality {

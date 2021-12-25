@@ -109,29 +109,3 @@ class FsDocumentContentDataSource(
         const val KEY_SIZE = 256 // bits
     }
 }
-
-//fun main() {
-//    val text = """
-//        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-//        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-//        ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-//        aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
-//        in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-//        sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-//        mollit anim id est laborum
-//    """.trimIndent()
-//
-//    val input = text.byteInputStream()
-//
-//    val ds = FsDocumentDataSource("whoy/NHOd2aOxzXjqkug1oSQrAu+0leYgKaUZaRsGdY=")
-//
-//    runBlocking {
-//        val d1 = Document(Path("uploads/croc_encrypted"))
-//        val d2 = Document(Path("uploads/lorem_encrypted.txt"))
-//        val k1 = ds.saveDocument(d1, FileInputStream("uploads/croc.jpg"))
-//        val k2 = ds.saveDocument(d2, input)
-//
-//        ds.getDocument(d1, k1).transferTo(FileOutputStream("uploads/croc_decrypted.jpg"))
-//        ds.getDocument(d2, k2).transferTo(FileOutputStream("uploads/lorem_decrypted.txt"))
-//    }
-//}

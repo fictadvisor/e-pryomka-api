@@ -5,7 +5,7 @@ import kotlinx.datetime.Instant
 data class Application(
     val id: ApplicationIdentifier,
     val userId: UserIdentifier,
-    val documents: List<DocumentType>,
+    val documents: Set<DocumentType>,
     val speciality: Speciality,
     val funding: Funding,
     val learningFormat: LearningFormat,
@@ -40,7 +40,7 @@ data class Application(
         PartTime,
     }
 
-    operator fun plus(documents: List<DocumentType>) = copy(
-        documents = documents,
+    operator fun plus(documents: Set<DocumentType>) = copy(
+        documents = this.documents + documents
     )
 }

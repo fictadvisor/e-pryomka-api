@@ -23,7 +23,7 @@ class ApplicationDataSourceImpl(
                     Application(
                         id = ApplicationIdentifier(it[Applications.id]),
                         userId = userId,
-                        documents = listOf(),
+                        documents = setOf(),
                         speciality = it[Applications.speciality],
                         funding = it[Applications.funding],
                         learningFormat = it[Applications.learningFormat],
@@ -39,7 +39,7 @@ class ApplicationDataSourceImpl(
                 .map { it[Documents.type] }
         }
 
-        return application + documents
+        return application + documents.toSet()
     }
 
     override suspend fun getByUserId(userId: UserIdentifier): List<Application> {
@@ -49,7 +49,7 @@ class ApplicationDataSourceImpl(
                     Application(
                         id = ApplicationIdentifier(it[Applications.id]),
                         userId = userId,
-                        documents = listOf(),
+                        documents = setOf(),
                         speciality = it[Applications.speciality],
                         funding = it[Applications.funding],
                         learningFormat = it[Applications.learningFormat],
@@ -75,7 +75,7 @@ class ApplicationDataSourceImpl(
         val map = documents.groupBy { it.applicationId }
 
         return applications.map { application ->
-            application.copy(documents = map[application.id]?.map { it.type } ?: emptyList())
+            application.copy(documents = map[application.id]?.map { it.type }?.toSet() ?: emptySet())
         }
     }
 
@@ -87,7 +87,7 @@ class ApplicationDataSourceImpl(
                     Application(
                         id = applicationId,
                         userId = UserIdentifier(it[Applications.userId]),
-                        documents = listOf(),
+                        documents = setOf(),
                         speciality = it[Applications.speciality],
                         funding = it[Applications.funding],
                         learningFormat = it[Applications.learningFormat],
@@ -103,7 +103,7 @@ class ApplicationDataSourceImpl(
                 .map { it[Documents.type] }
         }
 
-        return application + documents
+        return application + documents.toSet()
     }
 
     override suspend fun getAll(): List<Application> {
@@ -114,7 +114,7 @@ class ApplicationDataSourceImpl(
                     Application(
                         id = ApplicationIdentifier(it[Applications.id]),
                         userId = UserIdentifier(it[Applications.userId]),
-                        documents = listOf(),
+                        documents = setOf(),
                         speciality = it[Applications.speciality],
                         funding = it[Applications.funding],
                         learningFormat = it[Applications.learningFormat],
@@ -140,7 +140,7 @@ class ApplicationDataSourceImpl(
         val map = documentsDef.await().groupBy { it.applicationId }
 
         return applicationsDef.await().map { application ->
-            application.copy(documents = map[application.id]?.map { it.type } ?: emptyList())
+            application.copy(documents = map[application.id]?.map { it.type }?.toSet() ?: emptySet())
         }
     }
 

@@ -6,6 +6,6 @@ import java.io.InputStream
 
 interface DocumentContentDataSource {
     suspend fun save(document: DocumentMetadata, data: InputStream): DocumentKey
-    suspend fun get(document: DocumentMetadata, key: DocumentKey): InputStream
+    suspend fun get(document: DocumentMetadata): InputStream
     suspend fun delete(document: DocumentMetadata)
 }

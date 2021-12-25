@@ -6,5 +6,5 @@ import com.fictadvisor.pryomka.domain.models.Application
 fun Application.toDto() = ApplicationDto(
     id = id.value.toString(),
     status = status,
-    documents = documents
+    documents = documents.toList()
 )

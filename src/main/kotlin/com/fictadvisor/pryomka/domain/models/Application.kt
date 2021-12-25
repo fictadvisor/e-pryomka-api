@@ -3,7 +3,7 @@ package com.fictadvisor.pryomka.domain.models
 data class Application(
     val id: ApplicationIdentifier,
     val userId: UserIdentifier,
-    val documents: List<DocumentType>,
+    val documents: Set<DocumentType>,
     val status: Status,
 ) {
     enum class Status {
@@ -14,7 +14,7 @@ data class Application(
         Cancelled,
     }
 
-    operator fun plus(documents: List<DocumentType>) = copy(
+    operator fun plus(documents: Set<DocumentType>) = copy(
         documents = documents
     )
 }

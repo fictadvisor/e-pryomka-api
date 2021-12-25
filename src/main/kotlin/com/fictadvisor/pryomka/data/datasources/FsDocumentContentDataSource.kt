@@ -21,7 +21,6 @@ class FsDocumentContentDataSource(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : DocumentContentDataSource {
     private val secretKey by lazy {
-        println(secret)
         val decodedKey = Base64.getDecoder().decode(secret)
         SecretKeySpec(decodedKey, 0, decodedKey.size, KEY_GEN_ALGORITHM)
     }

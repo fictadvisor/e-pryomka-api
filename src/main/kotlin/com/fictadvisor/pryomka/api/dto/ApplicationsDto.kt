@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ApplicationResponseDto(
     val id: String,
-    val documents: List<DocumentType>,
+    val documents: Set<DocumentType>,
     val speciality: Application.Speciality,
     val funding: Application.Funding,
     val learningFormat: Application.LearningFormat,

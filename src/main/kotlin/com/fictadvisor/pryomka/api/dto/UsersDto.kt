@@ -7,3 +7,9 @@ data class UserDto(
     val id: String,
     val name: String,
 )
+
+@Serializable
+data class UserListDto(
+    val users: List<UserDto>
+)
+

@@ -25,7 +25,7 @@ fun Route.adminApplicationsRouters() {
             Provider.operatorManagementUseCases.add(operator.name)
             call.respond(HttpStatusCode.OK)
         } catch (e: IllegalStateException) {
-            call.respond(HttpStatusCode.Conflict, e.message ?: "")
+            call.respond(HttpStatusCode.Conflict, e.message.orEmpty())
         }
     }
 
@@ -41,7 +41,7 @@ fun Route.adminApplicationsRouters() {
             Provider.operatorManagementUseCases.delete(id)
             call.respond(HttpStatusCode.OK)
         } catch (e: IllegalStateException) {
-            call.respond(HttpStatusCode.NotFound, e.message ?: "")
+            call.respond(HttpStatusCode.NotFound, e.message.orEmpty())
         }
     }
 }

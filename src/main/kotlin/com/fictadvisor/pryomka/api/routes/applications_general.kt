@@ -37,9 +37,9 @@ fun Route.generalApplicationsRouters() {
         } catch (e: Unauthorized) {
             call.respond(HttpStatusCode.Unauthorized)
         } catch (e: NotFound) {
-            call.respond(HttpStatusCode.NotFound, e.message ?: "")
+            call.respond(HttpStatusCode.NotFound, e.message.orEmpty())
         } catch (e: PermissionDenied) {
-            call.respond(HttpStatusCode.Forbidden, e.message ?: "")
+            call.respond(HttpStatusCode.Forbidden, e.message.orEmpty())
         }
     }
 }

@@ -4,6 +4,7 @@ import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.dto.ApplicationRequestDto
 import com.fictadvisor.pryomka.api.mappers.toDomain
 import com.fictadvisor.pryomka.api.mappers.toDto
+import com.fictadvisor.pryomka.domain.interactors.ApplicationUseCase
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
 import com.fictadvisor.pryomka.domain.models.DocumentMetadata
@@ -40,17 +41,12 @@ fun Route.myApplicationsRouters() {
         val application = applicationRequest.toDomain(userId)
         val applicationUseCase = Provider.applicationUseCase
 
-        applicationUseCase.getByUserId(userId).filter { !it.status.isNegativelyTerminated }.takeIf { nonTerminated ->
-            nonTerminated.any { it.funding != application.funding } ||
-            nonTerminated.any { it.learningFormat != application.learningFormat } ||
-            nonTerminated.any { it.speciality != application.speciality }
-        } ?: run {
-            call.respond(HttpStatusCode.Forbidden, "Can't create application")
-            return@post
+        try {
+            applicationUseCase.create(application, userId)
+            call.respond(HttpStatusCode.OK, application.toDto())
+        } catch (e: ApplicationUseCase.Duplicated) {
+            call.respond(HttpStatusCode.Conflict, e.message.orEmpty())
         }
-
-        applicationUseCase.create(application)
-        call.respond(HttpStatusCode.OK, application.toDto())
     }
 
     post("/applications/{id}/documents") {

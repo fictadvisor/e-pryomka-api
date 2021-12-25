@@ -4,11 +4,13 @@ import com.fictadvisor.pryomka.data.db.Applications
 import com.fictadvisor.pryomka.data.db.Documents
 import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
 import com.fictadvisor.pryomka.domain.models.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.toKotlinInstant
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
-import java.util.*
 
 class ApplicationDataSourceImpl(
     private val dispatchers: CoroutineDispatcher = Dispatchers.IO,
@@ -22,6 +24,10 @@ class ApplicationDataSourceImpl(
                         id = ApplicationIdentifier(it[Applications.id]),
                         userId = userId,
                         documents = listOf(),
+                        speciality = it[Applications.speciality],
+                        funding = it[Applications.funding],
+                        learningFormat = it[Applications.learningFormat],
+                        createdAt = it[Applications.createdAt].toKotlinInstant(),
                         status = it[Applications.status],
                         statusMsg = it[Applications.statusMsg],
                     )
@@ -44,6 +50,10 @@ class ApplicationDataSourceImpl(
                         id = ApplicationIdentifier(it[Applications.id]),
                         userId = userId,
                         documents = listOf(),
+                        speciality = it[Applications.speciality],
+                        funding = it[Applications.funding],
+                        learningFormat = it[Applications.learningFormat],
+                        createdAt = it[Applications.createdAt].toKotlinInstant(),
                         status = it[Applications.status],
                         statusMsg = it[Applications.statusMsg],
                     )
@@ -78,6 +88,10 @@ class ApplicationDataSourceImpl(
                         id = applicationId,
                         userId = UserIdentifier(it[Applications.userId]),
                         documents = listOf(),
+                        speciality = it[Applications.speciality],
+                        funding = it[Applications.funding],
+                        learningFormat = it[Applications.learningFormat],
+                        createdAt = it[Applications.createdAt].toKotlinInstant(),
                         status = it[Applications.status],
                         statusMsg = it[Applications.statusMsg],
                     )
@@ -101,6 +115,10 @@ class ApplicationDataSourceImpl(
                         id = ApplicationIdentifier(it[Applications.id]),
                         userId = UserIdentifier(it[Applications.userId]),
                         documents = listOf(),
+                        speciality = it[Applications.speciality],
+                        funding = it[Applications.funding],
+                        learningFormat = it[Applications.learningFormat],
+                        createdAt = it[Applications.createdAt].toKotlinInstant(),
                         status = it[Applications.status],
                         statusMsg = it[Applications.statusMsg],
                     )
@@ -127,22 +145,19 @@ class ApplicationDataSourceImpl(
     }
 
     override suspend fun create(
-        userId: UserIdentifier
-    ): Application = newSuspendedTransaction(dispatchers) {
-        val application = Application(
-            id = ApplicationIdentifier(UUID.randomUUID()),
-            userId = userId,
-            documents = listOf(),
-            status = Application.Status.Pending,
-        )
+        application: Application,
+    ): Unit = newSuspendedTransaction(dispatchers) {
 
         Applications.insert {
             it[Applications.id] = application.id.value
             it[Applications.userId] = application.userId.value
+            it[Applications.speciality] = application.speciality
+            it[Applications.funding] = application.funding
+            it[Applications.learningFormat] = application.learningFormat
+            it[Applications.createdAt] = application.createdAt.toJavaInstant()
             it[Applications.status] = application.status
+            it[Applications.statusMsg] = application.statusMsg
         }
-
-        application
     }
 
     override suspend fun changeStatus(

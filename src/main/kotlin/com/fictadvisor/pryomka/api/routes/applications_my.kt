@@ -1,10 +1,13 @@
 package com.fictadvisor.pryomka.api.routes
 
-import com.fictadvisor.pryomka.api.mappers.toDto
 import com.fictadvisor.pryomka.Provider
-import com.fictadvisor.pryomka.api.dto.ChangeApplicationStatusDto
-import com.fictadvisor.pryomka.domain.models.*
+import com.fictadvisor.pryomka.api.dto.ApplicationRequestDto
+import com.fictadvisor.pryomka.api.mappers.toDomain
+import com.fictadvisor.pryomka.api.mappers.toDto
 import com.fictadvisor.pryomka.domain.models.Application
+import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
+import com.fictadvisor.pryomka.domain.models.DocumentMetadata
+import com.fictadvisor.pryomka.domain.models.DocumentType
 import com.fictadvisor.pryomka.utils.pathFor
 import com.fictadvisor.pryomka.utils.toUUIDOrNull
 import com.fictadvisor.pryomka.utils.userId
@@ -23,31 +26,50 @@ fun Route.myApplicationsRouters() {
             call.respond(HttpStatusCode.Unauthorized)
             return@get
         }
-        val applications = Provider.applicationUseCase.getByUserId(userId)
-        call.respond(applications.map(Application::toDto))
-    }
-
-    post("/applications/my") {
-        val userId = call.userId ?: run {
-            call.respond(HttpStatusCode.Unauthorized)
-            return@post
-        }
 
         val applications = Provider.applicationUseCase.getByUserId(userId)
         call.respond(applications.map(Application::toDto))
     }
 
-    post("/applications/my/documents") {
+    post<ApplicationRequestDto>("/applications/my") { applicationRequest ->
         val userId = call.userId ?: run {
             call.respond(HttpStatusCode.Unauthorized)
             return@post
         }
+
+        val application = applicationRequest.toDomain(userId)
+        val applicationUseCase = Provider.applicationUseCase
+
+        applicationUseCase.getByUserId(userId).filter { !it.status.isTerminal }.takeIf { nonTerminated ->
+            nonTerminated.any { it.funding != application.funding } ||
+            nonTerminated.any { it.learningFormat != application.learningFormat } ||
+            nonTerminated.any { it.speciality != application.speciality }
+        } ?: run {
+            call.respond(HttpStatusCode.Forbidden, "Can't create application")
+            return@post
+        }
+
+        applicationUseCase.create(application)
+        call.respond(HttpStatusCode.OK, application.toDto())
+    }
+
+    post("/applications/{id}/documents") {
+        val id = call.parameters["id"]?.toUUIDOrNull() ?: run {
+            call.respond(HttpStatusCode.BadRequest, "Invalid application id")
+            return@post
+        }
+
+        val userId = call.userId ?: run {
+            call.respond(HttpStatusCode.Unauthorized)
+            return@post
+        }
+
         var fileType: DocumentType? = null
         var stream: InputStream? = null
         var fileName: String? = null
 
         val applicationDef = async {
-            Provider.applicationUseCase.getByUserId(userId).first { !it.status.isTerminal }
+            Provider.applicationUseCase.get(ApplicationIdentifier(id), userId)
         }
 
         try {
@@ -63,7 +85,7 @@ fun Route.myApplicationsRouters() {
             }}
         } catch (e: IllegalStateException) { /* nothing */ }
 
-        val document = applicationDef.await().let { application ->
+        val document = applicationDef.await()?.let { application ->
             val type = fileType ?: run {
                 call.respond(HttpStatusCode.BadRequest, "File type is not provided")
                 return@post
@@ -73,7 +95,7 @@ fun Route.myApplicationsRouters() {
                 applicationId = application.id,
                 path = application.pathFor(
                     fileName ?: run {
-                        call.respond(HttpStatusCode.BadRequest, "File name not provided")
+                        call.respond(HttpStatusCode.BadRequest, "File name is not provided")
                         return@post
                     },
                     type
@@ -81,6 +103,9 @@ fun Route.myApplicationsRouters() {
                 type = type,
                 key = "",
             )
+        } ?: run {
+            call.respond(HttpStatusCode.NotFound)
+            return@post
         }
 
         val content = stream ?: run {

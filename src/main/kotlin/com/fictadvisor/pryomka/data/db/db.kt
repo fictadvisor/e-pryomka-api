@@ -4,6 +4,7 @@ import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.DocumentType
 import com.fictadvisor.pryomka.domain.models.User
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.javatime.timestamp
 
 object Users : Table() {
     val id = uuid("id").autoGenerate()
@@ -16,6 +17,10 @@ object Users : Table() {
 object Applications : Table() {
     val id = uuid("id").autoGenerate()
     val userId = uuid("user_id") references Users.id
+    val speciality = enumeration("speciality", Application.Speciality::class)
+    val funding = enumeration("funding", Application.Funding::class)
+    val learningFormat = enumeration("learning_format", Application.LearningFormat::class)
+    val createdAt = timestamp("creation_time")
     val status = enumeration("status", Application.Status::class)
     val statusMsg = varchar("status_msg", 256).nullable().default(null)
 

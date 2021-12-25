@@ -15,6 +15,6 @@ data class Application(
     }
 
     operator fun plus(documents: Set<DocumentType>) = copy(
-        documents = documents
+        documents = this.documents + documents
     )
 }

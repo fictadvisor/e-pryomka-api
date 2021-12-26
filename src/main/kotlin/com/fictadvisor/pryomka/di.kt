@@ -1,13 +1,7 @@
 package com.fictadvisor.pryomka
 
-import com.fictadvisor.pryomka.data.datasources.ApplicationDataSourceImpl
-import com.fictadvisor.pryomka.data.datasources.DocumentMetadataDataSourceImpl
-import com.fictadvisor.pryomka.data.datasources.FsDocumentContentDataSource
-import com.fictadvisor.pryomka.data.datasources.UserDataSourceImpl
-import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
-import com.fictadvisor.pryomka.domain.datasource.DocumentContentDataSource
-import com.fictadvisor.pryomka.domain.datasource.DocumentMetadataDataSource
-import com.fictadvisor.pryomka.domain.datasource.UserDataSource
+import com.fictadvisor.pryomka.data.datasources.*
+import com.fictadvisor.pryomka.domain.datasource.*
 import com.fictadvisor.pryomka.domain.interactors.*
 
 object Provider {
@@ -16,7 +10,7 @@ object Provider {
     }
 
     val changeApplicationStatusUseCase: ChangeApplicationStatusUseCase by lazy {
-        ChangeApplicationStatusUseCaseImpl(userDataSource, applicationDataSource)
+        ChangeApplicationStatusUseCaseImpl(userDataSource, applicationDataSource, reviewsDataSource)
     }
 
     val getDocumentsUseCase: GetDocumentsUseCase by lazy {
@@ -47,4 +41,5 @@ object Provider {
     private val documentMetadataDataSource: DocumentMetadataDataSource by lazy {
         DocumentMetadataDataSourceImpl()
     }
+    private val reviewsDataSource: ReviewsDataSource by lazy { ReviewsDataSourceImpl() }
 }

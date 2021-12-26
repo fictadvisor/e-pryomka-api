@@ -5,10 +5,8 @@ import com.fictadvisor.pryomka.api.dto.ApplicationRequestDto
 import com.fictadvisor.pryomka.api.mappers.toDomain
 import com.fictadvisor.pryomka.api.mappers.toDto
 import com.fictadvisor.pryomka.domain.interactors.ApplicationUseCase
+import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
-import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
-import com.fictadvisor.pryomka.domain.models.DocumentMetadata
-import com.fictadvisor.pryomka.domain.models.DocumentType
 import com.fictadvisor.pryomka.utils.pathFor
 import com.fictadvisor.pryomka.utils.toUUIDOrNull
 import com.fictadvisor.pryomka.utils.userId
@@ -44,7 +42,7 @@ fun Route.myApplicationsRouters() {
         try {
             applicationUseCase.create(application, userId)
             call.respond(HttpStatusCode.OK, application.toDto())
-        } catch (e: ApplicationUseCase.Duplicated) {
+        } catch (e: Duplicated) {
             call.respond(HttpStatusCode.Conflict, e.message.orEmpty())
         }
     }

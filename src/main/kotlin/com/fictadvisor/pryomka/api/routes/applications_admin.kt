@@ -3,15 +3,18 @@ package com.fictadvisor.pryomka.api.routes
 import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.dto.CreateOperatorDto
 import com.fictadvisor.pryomka.api.mappers.toUserListDto
+import com.fictadvisor.pryomka.domain.interactors.OperatorManagementUseCases
 import com.fictadvisor.pryomka.domain.models.toUserIdentifierOrNull
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.adminApplicationsRouters() {
+fun Route.adminApplicationsRouters(
+    useCase: OperatorManagementUseCases = Provider.operatorManagementUseCases,
+) {
     get("/operators") {
-        val users = Provider.operatorManagementUseCases.getAll()
+        val users = useCase.getAll()
         call.respond(users.toUserListDto())
     }
 
@@ -22,7 +25,7 @@ fun Route.adminApplicationsRouters() {
         }
 
         try {
-            Provider.operatorManagementUseCases.add(operator.name)
+            useCase.add(operator.name)
             call.respond(HttpStatusCode.OK)
         } catch (e: IllegalStateException) {
             call.respond(HttpStatusCode.Conflict, e.message.orEmpty())
@@ -38,7 +41,7 @@ fun Route.adminApplicationsRouters() {
             }
 
         try {
-            Provider.operatorManagementUseCases.delete(id)
+            useCase.delete(id)
             call.respond(HttpStatusCode.OK)
         } catch (e: IllegalStateException) {
             call.respond(HttpStatusCode.NotFound, e.message.orEmpty())

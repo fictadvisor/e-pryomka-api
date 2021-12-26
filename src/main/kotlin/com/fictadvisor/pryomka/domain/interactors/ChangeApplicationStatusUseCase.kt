@@ -98,10 +98,13 @@ class ChangeApplicationStatusUseCaseImpl(
         newStatus: Status,
         statusMsg: String?,
     ) {
-        if (newStatus == Status.InReview) {
-            reviewsDataSource.addToReview(application.id, adminId)
-        } else if (application.status == Status.InReview) {
-            reviewsDataSource.removeFromReview(application.id)
+        when {
+            newStatus == Status.InReview -> {
+                reviewsDataSource.addToReview(application.id, adminId)
+            }
+            application.status == Status.InReview -> {
+                reviewsDataSource.removeFromReview(application.id)
+            }
         }
         applicationDataSource.changeStatus(application.id, newStatus, statusMsg)
     }

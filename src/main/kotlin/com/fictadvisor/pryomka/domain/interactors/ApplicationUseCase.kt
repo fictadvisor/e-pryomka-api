@@ -29,12 +29,11 @@ class ApplicationUseCaseImpl(
     override suspend fun getAll() = ds.getAll()
     override suspend fun create(application: Application, userId: UserIdentifier) {
         ds.getByUserId(userId).filter { !it.status.isNegativelyTerminated }.takeIf { nonTerminated ->
-            val a = nonTerminated.none {
+            nonTerminated.none {
                 it.funding == application.funding &&
                 it.learningFormat == application.learningFormat &&
                 it.speciality == application.speciality
             }
-            a
         } ?: duplicate("Can't duplicate applications")
 
         ds.create(application)

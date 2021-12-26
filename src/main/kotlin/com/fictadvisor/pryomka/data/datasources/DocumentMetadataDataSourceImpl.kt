@@ -22,7 +22,7 @@ class DocumentMetadataDataSourceImpl(
     ): Unit = newSuspendedTransaction(dispatcher) {
         Documents.insert {
             it[Documents.applicationId] = document.applicationId.value
-            it[path] = document.path.value
+            it[Documents.path] = document.path.value
             it[Documents.type] = document.type
             it[Documents.key] = document.key
         }

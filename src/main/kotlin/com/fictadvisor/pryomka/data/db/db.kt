@@ -41,3 +41,9 @@ object Documents : Table() {
         uniqueIndex(applicationId, type)
     }
 }
+
+object Reviews : Table() {
+    val id = uuid("id").autoGenerate()
+    val applicationId = uuid("application_id").uniqueIndex() references Applications.id
+    val operatorId = uuid("operator_id") references Users.id
+}

@@ -1,6 +1,7 @@
 package com.fictadvisor.pryomka.domain.interactors
 
 import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
+import com.fictadvisor.pryomka.domain.datasource.ReviewsDataSource
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application.Status
@@ -18,6 +19,7 @@ interface ChangeApplicationStatusUseCase {
 class ChangeApplicationStatusUseCaseImpl(
     private val userDataSource: UserDataSource,
     private val applicationDataSource: ApplicationDataSource,
+    private val reviewsDataSource: ReviewsDataSource,
 ) : ChangeApplicationStatusUseCase {
     override suspend fun changeStatus(
         applicationId: ApplicationIdentifier,
@@ -27,12 +29,13 @@ class ChangeApplicationStatusUseCaseImpl(
     ) {
         val user = userDataSource.findUser(userId) ?: unauthorized()
         val application = applicationDataSource.get(applicationId, userId) ?: notfound("Can't find application")
+        if (application.status == newStatus) permissionDenied("Can't change to this status")
         val msg = statusMsg.takeIf { newStatus == Status.Rejected }
 
         when (user.role) {
             User.Role.Entrant -> changeStatusEntrant(application, newStatus)
-            User.Role.Operator -> changeStatusOperator(application, newStatus, msg)
-            User.Role.Admin -> changeStatusAdmin(application, newStatus, msg)
+            User.Role.Operator -> changeStatusOperator(application, user.id, newStatus, msg)
+            User.Role.Admin -> changeStatusAdmin(application, user.id, newStatus, msg)
         }
     }
 
@@ -61,20 +64,27 @@ class ChangeApplicationStatusUseCaseImpl(
 
     private suspend fun changeStatusOperator(
         application: Application,
+        operatorId: UserIdentifier,
         newStatus: Status,
         statusMsg: String?,
     ) {
         when (application.status) {
             Status.Pending -> {
-                if (newStatus != Status.InReview) {
+                val alreadyInReview = reviewsDataSource.checkInReview(application.id)
+                if (newStatus != Status.InReview || alreadyInReview) {
                     permissionDenied("Can't change to this status")
                 }
+
+                reviewsDataSource.addToReview(application.id, operatorId)
             }
 
             Status.InReview -> {
-                if (newStatus !in listOf(Status.Approved, Status.Rejected)) {
+                val reviewerId = reviewsDataSource.getReviewerId(application.id)
+                if (newStatus !in listOf(Status.Approved, Status.Rejected) || operatorId != reviewerId) {
                     permissionDenied("Can't change to this status")
                 }
+
+                reviewsDataSource.removeFromReview(application.id)
             }
 
             else -> permissionDenied("Can't change this status")
@@ -84,9 +94,15 @@ class ChangeApplicationStatusUseCaseImpl(
 
     private suspend fun changeStatusAdmin(
         application: Application,
+        adminId: UserIdentifier,
         newStatus: Status,
         statusMsg: String?,
     ) {
+        if (newStatus == Status.InReview) {
+            reviewsDataSource.addToReview(application.id, adminId)
+        } else if (application.status == Status.InReview) {
+            reviewsDataSource.removeFromReview(application.id)
+        }
         applicationDataSource.changeStatus(application.id, newStatus, statusMsg)
     }
 }

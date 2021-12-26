@@ -28,7 +28,11 @@ class ChangeApplicationStatusUseCaseImpl(
         statusMsg: String?,
     ) {
         val user = userDataSource.findUser(userId) ?: unauthorized()
-        val application = applicationDataSource.get(applicationId, userId) ?: notfound("Can't find application")
+        val application = if (user.role == User.Role.Entrant) {
+            applicationDataSource.get(applicationId, userId) ?: notfound("Can't find application")
+        } else {
+            applicationDataSource.getById(applicationId) ?: notfound("Can't find application")
+        }
         if (application.status == newStatus) permissionDenied("Can't change to this status")
         val msg = statusMsg.takeIf { newStatus == Status.Rejected }
 

@@ -171,7 +171,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.Pending)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         Mockito.`when`(reviewsDataSource.checkInReview(randomApplication.id)).thenReturn(false)
 
@@ -196,7 +196,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.Pending)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         Mockito.`when`(reviewsDataSource.checkInReview(randomApplication.id)).thenReturn(true)
 
@@ -215,7 +215,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.Pending)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         Mockito.`when`(reviewsDataSource.checkInReview(randomApplication.id)).thenReturn(false)
 
@@ -232,7 +232,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.InReview)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         Mockito.`when`(reviewsDataSource.getReviewerId(randomApplication.id)).thenReturn(randomUser.id)
 
@@ -255,7 +255,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.InReview)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         Mockito.`when`(reviewsDataSource.getReviewerId(randomApplication.id)).thenReturn(randomUser.id)
 
@@ -278,7 +278,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.InReview)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         Mockito.`when`(reviewsDataSource.getReviewerId(randomApplication.id)).thenReturn(generateUserId())
 
@@ -297,7 +297,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.InReview)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         Mockito.`when`(reviewsDataSource.getReviewerId(randomApplication.id)).thenReturn(randomUser.id)
 
@@ -316,7 +316,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.Rejected)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         // when + then
         assertThrows<PermissionDenied> {
@@ -331,7 +331,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.Pending)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         // when
         useCase.changeStatus(randomApplication.id, randomUser.id, Application.Status.InReview, null)
@@ -350,7 +350,7 @@ class ChangeApplicationStatusUseCaseTest {
         Mockito.`when`(userDataSource.findUser(randomUser.id)).thenReturn(randomUser)
 
         val randomApplication = application(status = Application.Status.InReview)
-        Mockito.`when`(applicationDataSource.get(randomApplication.id, randomUser.id)).thenReturn(randomApplication)
+        Mockito.`when`(applicationDataSource.getById(randomApplication.id)).thenReturn(randomApplication)
 
         // when
         useCase.changeStatus(randomApplication.id, randomUser.id, Application.Status.Pending, null)

@@ -21,16 +21,16 @@ object Provider {
         SubmitDocumentUseCaseImpl(documentContentDataSource, documentMetadataDataSource)
     }
 
-    val createUserUseCase: CreateUserUseCase by lazy {
-        CreateUserUseCaseImpl(userDataSource)
-    }
-
-    val findUserUseCase: FindUserUseCase by lazy {
-        FindUserUseCaseImpl(userDataSource)
-    }
-
     val operatorManagementUseCases: OperatorManagementUseCases by lazy {
-        OperatorManagementUseCaseImpl(userDataSource)
+        OperatorManagementUseCaseImpl(userDataSource, registerStaffUseCase)
+    }
+
+    val authUseCase: AuthUseCase by lazy {
+        AuthUseCaseImpl(userDataSource)
+    }
+
+    val registerStaffUseCase: RegisterStaffUseCase by lazy {
+        RegisterStaffUseCaseImpl(userDataSource)
     }
 
     private val userDataSource: UserDataSource by lazy { UserDataSourceImpl() }

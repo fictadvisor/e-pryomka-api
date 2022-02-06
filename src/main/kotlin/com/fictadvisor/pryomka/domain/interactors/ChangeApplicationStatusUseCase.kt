@@ -27,7 +27,9 @@ class ChangeApplicationStatusUseCaseImpl(
         newStatus: Status,
         statusMsg: String?,
     ) {
-        val user = userDataSource.findUser(userId) ?: unauthorized()
+        val user = userDataSource.findEntrant(userId) ?:
+            userDataSource.findStaff(userId)
+            ?: unauthorized()
         val application = if (user.role == User.Role.Entrant) {
             applicationDataSource.get(applicationId, userId) ?: notfound("Can't find application")
         } else {

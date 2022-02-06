@@ -3,36 +3,28 @@ package com.fictadvisor.pryomka.domain.interactors
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.models.User
 import com.fictadvisor.pryomka.domain.models.UserIdentifier
-import com.fictadvisor.pryomka.domain.models.generateUserId
 
 interface OperatorManagementUseCases {
-    suspend fun add(name: String)
+    suspend fun add(login: String, password: String): User
     suspend fun getAll(): List<User>
     suspend fun delete(id: UserIdentifier)
 }
 
 class OperatorManagementUseCaseImpl(
     private val userDataSource: UserDataSource,
+    private val registerStaffUseCase: RegisterStaffUseCase,
 ) : OperatorManagementUseCases {
-    override suspend fun add(name: String) {
-        val existing = userDataSource.findUser(name)
+    override suspend fun add(login: String, password: String): User {
+        val existing = userDataSource.findStaffByCredentials(login)
 
         if (existing != null) error("User already exists")
 
-        userDataSource.addUser(User(
-            id = generateUserId(),
-            name = name,
-            role = User.Role.Operator,
-        ))
+        return registerStaffUseCase.register(login, password, User.Role.Operator)
     }
 
-    override suspend fun getAll(): List<User> = userDataSource.findByRole(User.Role.Operator)
+    override suspend fun getAll(): List<User> = userDataSource.findAllByRole(User.Role.Operator)
 
     override suspend fun delete(id: UserIdentifier) {
-        val user = userDataSource.findUser(id)
-            ?.takeIf { it.role == User.Role.Operator }
-            ?: error("User does not exist")
-
-        userDataSource.deleteUser(user)
+        userDataSource.deleteStaff(id)
     }
 }

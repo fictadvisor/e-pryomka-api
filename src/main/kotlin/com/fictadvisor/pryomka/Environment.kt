@@ -6,6 +6,13 @@ object Environment {
     // Encryption
     val SECRET get() = env["SECRET"] ?: error("SECRET is not set")
 
+    // JWT
+    val JWT_SECRET get() = env["JWT_SECRET"] ?: error("JWT_PRIVATE_KEY is not set")
+    val JWT_ISSUER get() = env["JWT_ISSUER"] ?: "https://vstup.fictadvisor.com/"
+    val JWT_AUDIENCE get() = env["JWT_AUDIENCE"] ?: "https://vstup.fictadvisor.com/api/"
+    val JWT_REALM get() = env["JWT_REALM"] ?: "Access to api"
+    val JWT_EXPIRATION_TIME get() = env["JWT_EXPIRATION_TIME"]?.toInt() ?: 900_000
+
     // DB
     val DB_SOURCE_CLASS_NAME get() = env["DB_SOURCE_CLASS_NAME"] ?: "org.postgresql.ds.PGSimpleDataSource"
     val DB_HOST get() = env["DB_HOST"] ?: "localhost"

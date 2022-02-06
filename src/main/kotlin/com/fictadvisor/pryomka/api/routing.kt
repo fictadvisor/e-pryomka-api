@@ -1,11 +1,12 @@
 package com.fictadvisor.pryomka.api
 
-import com.fictadvisor.pryomka.api.routes.adminApplicationsRouters
-import com.fictadvisor.pryomka.api.routes.generalApplicationsRouters
-import com.fictadvisor.pryomka.api.routes.myApplicationsRouters
-import com.fictadvisor.pryomka.api.routes.operatorApplicationsRouters
+import com.fictadvisor.pryomka.Provider
+import com.fictadvisor.pryomka.api.dto.CreateOperatorDto
+import com.fictadvisor.pryomka.api.routes.*
+import com.fictadvisor.pryomka.domain.models.User
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
@@ -27,8 +28,19 @@ fun Application.configureRouting() {
             myApplicationsRouters()
         }
 
+        loginRouters()
+
         get("/") {
             call.respondText("Welcome to FICT!")
+        }
+
+        post<CreateOperatorDto>("/register_admin") { (login, password) ->
+            try {
+                Provider.registerStaffUseCase.register(login, password, User.Role.Admin)
+                call.respond(HttpStatusCode.OK)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.NotFound)
+            }
         }
     }
 }

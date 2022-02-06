@@ -18,14 +18,19 @@ fun Route.adminApplicationsRouters(
         call.respond(users.toUserListDto())
     }
 
-    post<CreateOperatorDto>("/operators") { operator ->
-        if (operator.name.isBlank()) {
+    post<CreateOperatorDto>("/operators") { (login, password) ->
+        if (login.isBlank()) {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+
+        if (password.isBlank()) {
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
 
         try {
-            useCase.add(operator.name)
+            useCase.add(login, password)
             call.respond(HttpStatusCode.OK)
         } catch (e: IllegalStateException) {
             call.respond(HttpStatusCode.Conflict, e.message.orEmpty())

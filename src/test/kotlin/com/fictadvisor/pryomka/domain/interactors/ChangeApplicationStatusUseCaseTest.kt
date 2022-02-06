@@ -7,8 +7,6 @@ import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.user
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import kotlin.test.Test

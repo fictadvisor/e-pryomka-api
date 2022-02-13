@@ -10,7 +10,7 @@ import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-fun Route.adminApplicationsRouters(
+fun Route.operatorsRoutes(
     useCase: OperatorManagementUseCases = Provider.operatorManagementUseCases,
 ) {
     get("/operators") {

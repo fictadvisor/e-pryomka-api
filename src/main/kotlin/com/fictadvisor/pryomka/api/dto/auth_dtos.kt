@@ -24,5 +24,6 @@ data class RefreshRequest(
 data class WhoAmIDto(
     val id: String,
     val name: String,
-    val role: User.Role,
+    val role: User.Staff.Role? = null,
+    val photoUrl: String? = null,
 )

@@ -6,7 +6,7 @@ import com.fictadvisor.pryomka.domain.models.UserIdentifier
 
 interface OperatorManagementUseCases {
     suspend fun add(login: String, password: String): User
-    suspend fun getAll(): List<User>
+    suspend fun getAll(): List<User.Staff>
     suspend fun delete(id: UserIdentifier)
 }
 
@@ -19,10 +19,12 @@ class OperatorManagementUseCaseImpl(
 
         if (existing != null) error("User already exists")
 
-        return registerStaffUseCase.register(login, password, User.Role.Operator)
+        return registerStaffUseCase.register(login, password, User.Staff.Role.Operator)
     }
 
-    override suspend fun getAll(): List<User> = userDataSource.findAllByRole(User.Role.Operator)
+    override suspend fun getAll(): List<User.Staff> = userDataSource.findAllByRole(
+        User.Staff.Role.Operator
+    )
 
     override suspend fun delete(id: UserIdentifier) {
         userDataSource.deleteStaff(id)

@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.Payload
 import com.fictadvisor.pryomka.Environment
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCase
-import com.fictadvisor.pryomka.domain.models.User
 import com.fictadvisor.pryomka.domain.models.toUserIdentifierOrNull
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -43,7 +42,7 @@ fun Application.configureSecurity(authUseCase: AuthUseCase) {
 
             validate { credential -> credential.payload
                 .user()
-                ?.takeIf { it.role == User.Role.Admin }
+                ?.takeIf { it.isAdmin }
                 ?.let { JWTPrincipal(credential.payload) }
             }
         }
@@ -54,7 +53,7 @@ fun Application.configureSecurity(authUseCase: AuthUseCase) {
 
             validate { credential -> credential.payload
                 .user()
-                ?.takeIf { it.role == User.Role.Admin || it.role == User.Role.Operator }
+                ?.takeIf { it.isOperator || it.isAdmin }
                 ?.let { JWTPrincipal(credential.payload) }
             }
         }
@@ -65,7 +64,7 @@ fun Application.configureSecurity(authUseCase: AuthUseCase) {
 
             validate { credential -> credential.payload
                 .user()
-                ?.takeIf { it.role == User.Role.Entrant }
+                ?.takeIf { it.isEntrant }
                 ?.let { JWTPrincipal(credential.payload) }
             }
         }

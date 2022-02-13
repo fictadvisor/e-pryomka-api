@@ -18,7 +18,7 @@ fun Application.configureRouting() {
         }
 
         authenticate(AUTH_ADMIN) {
-            adminApplicationsRouters()
+            operatorsRoutes()
         }
 
         authenticate(AUTH_OPERATOR) {
@@ -37,7 +37,7 @@ fun Application.configureRouting() {
 
         post<CreateOperatorDto>("/register_admin") { (login, password) ->
             try {
-                Provider.registerStaffUseCase.register(login, password, User.Role.Admin)
+                Provider.registerStaffUseCase.register(login, password, User.Staff.Role.Admin)
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.NotFound)

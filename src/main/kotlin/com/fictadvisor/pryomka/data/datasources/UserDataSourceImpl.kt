@@ -16,28 +16,85 @@ class UserDataSourceImpl(
 ) : UserDataSource {
     override suspend fun findEntrant(
         id: UserIdentifier
-    ): User? = newSuspendedTransaction(dispatchers) {
+    ): User.Entrant? = newSuspendedTransaction(dispatchers) {
         Entrants.select { Entrants.id eq id.value }
             .singleOrNull()
-            ?.let { User(id, it[Entrants.name], User.Role.Entrant) }
+            ?.let {
+                User.Entrant(
+                    id = id,
+                    telegramId = it[Entrants.telegramId],
+                    firstName = it[Entrants.firstName],
+                    lastName = it[Entrants.lastName],
+                    userName = it[Entrants.userName],
+                    photoUrl = it[Entrants.photoUrl],
+                )
+            }
+    }
+
+    override suspend fun findEntrantByTelegramId(
+        id: Long
+    ): User.Entrant? = newSuspendedTransaction(dispatchers) {
+        Entrants.select { Entrants.telegramId eq id }
+            .firstOrNull()
+            ?.let {
+                User.Entrant(
+                    id = UserIdentifier(it[Entrants.id]),
+                    telegramId = it[Entrants.telegramId],
+                    firstName = it[Entrants.firstName],
+                    lastName = it[Entrants.lastName],
+                    userName = it[Entrants.userName],
+                    photoUrl = it[Entrants.photoUrl],
+                )
+            }
+    }
+
+    override suspend fun registerEntrant(
+        user: User.Entrant
+    ): Unit = newSuspendedTransaction(dispatchers) {
+        Entrants.insert {
+            it[id] = user.id.value
+            it[telegramId] = user.telegramId
+            it[firstName] = user.firstName
+            it[lastName] = user.lastName
+            it[userName] = user.userName
+            it[photoUrl] = user.photoUrl
+        }
+    }
+
+    override suspend fun updateEntrant(
+        user: User.Entrant
+    ): Unit = newSuspendedTransaction(dispatchers) {
+        Entrants.update(
+            where = { Entrants.telegramId eq user.telegramId }
+        ) {
+            it[firstName] = user.firstName
+            it[lastName] = user.lastName
+            it[userName] = user.userName
+            it[photoUrl] = user.photoUrl
+        }
     }
 
     override suspend fun findStaff(
         id: UserIdentifier,
-        roles: List<User.Role>,
-    ): User? = newSuspendedTransaction(dispatchers) {
+        roles: List<User.Staff.Role>,
+    ): User.Staff? = newSuspendedTransaction(dispatchers) {
         Staff.select {
             Staff.id.eq(id.value).and {
                 Staff.role.inList(roles)
             }
-        }.singleOrNull()
-            ?.let { User(id, it[Staff.login], it[Staff.role]) }
+        }.singleOrNull()?.let {
+            User.Staff(
+                id = id,
+                name = it[Staff.login],
+                role = it[Staff.role]
+            )
+        }
     }
 
     override suspend fun findStaffByCredentials(
         login: String,
         password: String?,
-    ): User? = newSuspendedTransaction(dispatchers) {
+    ): User.Staff? = newSuspendedTransaction(dispatchers) {
         Staff.select {
             Staff.login.eq(login)
         }.singleOrNull()?.let {
@@ -45,7 +102,11 @@ class UserDataSourceImpl(
             val salt = it[Staff.salt]
 
             if (password == null || Hash.verify(password, hashedPassword, salt)) {
-                User(UserIdentifier(it[Staff.id]), login, it[Staff.role])
+                User.Staff(
+                    id = UserIdentifier(it[Staff.id]),
+                    name = login,
+                    role = it[Staff.role]
+                )
             } else {
                 null
             }
@@ -53,32 +114,21 @@ class UserDataSourceImpl(
     }
 
     override suspend fun findAllByRole(
-        role: User.Role
-    ): List<User> = newSuspendedTransaction(dispatchers) {
-        if (role == User.Role.Entrant) {
-            Entrants.selectAll().map {
-                User(
-                    UserIdentifier(it[Entrants.id]),
-                    it[Entrants.name],
-                    role,
-                )
-            }
-        } else {
-            Staff.select { Staff.role eq role }
-                .map {
-                    User(
-                        UserIdentifier(it[Staff.id]),
-                        it[Staff.login],
-                        role,
-                    )
-                }
+        role: User.Staff.Role
+    ): List<User.Staff> = newSuspendedTransaction(dispatchers) {
+        Staff.select { Staff.role eq role }.map {
+            User.Staff(
+                id = UserIdentifier(it[Staff.id]),
+                name = it[Staff.login],
+                role = role,
+            )
         }
     }
 
     override suspend fun registerStaff(
         login: String,
         password: String,
-        role: User.Role,
+        role: User.Staff.Role,
     ): Unit = newSuspendedTransaction(dispatchers) {
         val salt = Hash.generateSalt()
         val hashedPassword = Hash.hash(password, salt)
@@ -95,7 +145,7 @@ class UserDataSourceImpl(
         id: UserIdentifier
     ): Unit = newSuspendedTransaction(dispatchers) {
         Staff.deleteWhere {
-            Staff.id.eq(id.value).andNot { Staff.role eq User.Role.Admin }
+            Staff.id.eq(id.value).andNot { Staff.role eq User.Staff.Role.Admin }
         }
     }
 }

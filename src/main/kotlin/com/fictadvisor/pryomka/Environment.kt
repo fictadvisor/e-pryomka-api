@@ -29,4 +29,7 @@ object Environment {
     // Server
     val PORT get() = env["PORT"]?.toInt() ?: 8080
     val HOST get() = env["HOST"] ?: "0.0.0.0"
+
+    // Telegram
+    val TG_BOT_ID get() = env["TG_BOT_ID"] ?: error("TG_BOT_ID not set")
 }

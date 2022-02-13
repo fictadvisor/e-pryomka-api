@@ -9,7 +9,11 @@ import org.jetbrains.exposed.sql.javatime.timestamp
 
 object Entrants : Table() {
     val id = uuid("id").autoGenerate()
-    val name = varchar("name", 64)
+    val telegramId = long("telegram_id")
+    val firstName = varchar("first_name", 64)
+    val lastName = varchar("last_name", 64).nullable()
+    val userName = varchar("user_name", 32).nullable()
+    val photoUrl = varchar("photo_url", 128).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }
@@ -19,7 +23,7 @@ object Staff : Table() {
     val login = varchar("login", 32)
     val password = varchar("password", 128)
     val salt = varchar("salt", 32)
-    val role = enumeration("role", User.Role::class)
+    val role = enumeration("role", User.Staff.Role::class)
 
     override val primaryKey = PrimaryKey(id)
 }

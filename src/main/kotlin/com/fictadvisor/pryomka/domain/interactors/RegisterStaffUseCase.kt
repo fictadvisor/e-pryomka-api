@@ -7,16 +7,16 @@ interface RegisterStaffUseCase {
     suspend fun register(
         login: String,
         password: String,
-        role: User.Role,
+        role: User.Staff.Role,
     ): User
 }
 
 class RegisterStaffUseCaseImpl(
     private val userDataSource: UserDataSource
 ) : RegisterStaffUseCase {
-    override suspend fun register(login: String, password: String, role: User.Role): User {
-        if (role == User.Role.Admin) {
-            val admins = userDataSource.findAllByRole(User.Role.Admin)
+    override suspend fun register(login: String, password: String, role: User.Staff.Role): User {
+        if (role == User.Staff.Role.Admin) {
+            val admins = userDataSource.findAllByRole(User.Staff.Role.Admin)
 
             if (admins.isNotEmpty()) error("Admin already exists")
         }

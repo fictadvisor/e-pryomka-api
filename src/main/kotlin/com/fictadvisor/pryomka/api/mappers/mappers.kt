@@ -29,7 +29,7 @@ fun ApplicationRequestDto.toDomain(userId: UserIdentifier) = Application(
     status = Application.Status.Preparing,
 )
 
-fun List<User>.toUserListDto() = UserListDto(
+fun List<User.Staff>.toUserListDto() = UserListDto(
     users = map { user ->
         UserDto(
             id = user.id.value.toString(),
@@ -38,4 +38,15 @@ fun List<User>.toUserListDto() = UserListDto(
     }
 )
 
-fun User.toWhoAmIDto() = WhoAmIDto(id.value.toString(), name, role)
+fun User.toWhoAmIDto() = when (this) {
+    is User.Entrant -> WhoAmIDto(
+        id = id.value.toString(),
+        name = "$firstName ${lastName ?: ""}".trim(),
+        photoUrl = photoUrl
+    )
+    is User.Staff -> WhoAmIDto(
+        id = id.value.toString(),
+        name = name,
+        role = role,
+    )
+}

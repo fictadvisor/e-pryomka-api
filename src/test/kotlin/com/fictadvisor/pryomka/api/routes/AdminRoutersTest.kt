@@ -33,7 +33,7 @@ class AdminRoutersTest {
         Mockito.`when`(useCase.getAll()).thenReturn(users)
 
         // WHEN + THEN
-        withRouters({ adminApplicationsRouters(useCase) }) {
+        withRouters({ operatorsRoutes(useCase) }) {
             handleRequest(HttpMethod.Get, "/operators").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(users.toUserListDto(), response.body())
@@ -51,7 +51,7 @@ class AdminRoutersTest {
         Mockito.`when`(useCase.getAll()).thenReturn(users)
 
         // WHEN + THEN
-        withRouters({ adminApplicationsRouters(useCase) }) {
+        withRouters({ operatorsRoutes(useCase) }) {
             handleRequest(HttpMethod.Get, "/operators").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(users.toUserListDto(), response.body())
@@ -67,7 +67,7 @@ class AdminRoutersTest {
         Mockito.`when`(useCase.add(any())).thenReturn(Unit)
 
         // WHEN + THEN
-        withRouters({ adminApplicationsRouters(useCase) }) {
+        withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Post, "/operators") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setJsonBody(CreateOperatorDto("Lelouch Lamperouge"))
@@ -91,7 +91,7 @@ class AdminRoutersTest {
         Mockito.`when`(useCase.add(any())).thenReturn(Unit)
 
         // WHEN + THEN
-        withRouters({ adminApplicationsRouters(useCase) }) {
+        withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Post, "/operators") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setJsonBody(CreateOperatorDto(""))
@@ -114,7 +114,7 @@ class AdminRoutersTest {
         Mockito.`when`(useCase.add(any())).thenThrow(IllegalStateException("User already exists"))
 
         // WHEN + THEN
-        withRouters({ adminApplicationsRouters(useCase) }) {
+        withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Post, "/operators") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setJsonBody(CreateOperatorDto("Lelouch vi Britannia"))
@@ -135,7 +135,7 @@ class AdminRoutersTest {
         Mockito.`when`(useCase.delete(operatorId)).thenReturn(Unit)
 
         // WHEN + THEN
-        withRouters({ adminApplicationsRouters(useCase) }) {
+        withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Delete, "/operators/${operatorId.value}")
             with(call) {
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -153,7 +153,7 @@ class AdminRoutersTest {
             .thenThrow(IllegalStateException("User does not exist"))
 
         // WHEN + THEN
-        withRouters({ adminApplicationsRouters(useCase) }) {
+        withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Delete, "/operators/${operatorId.value}")
             with(call) {
                 assertEquals(HttpStatusCode.NotFound, response.status())
@@ -168,7 +168,7 @@ class AdminRoutersTest {
         // GIVEN
 
         // WHEN + THEN
-        withRouters({ adminApplicationsRouters(useCase) }) {
+        withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Delete, "/operators/abcd")
             with(call) {
                 assertEquals(HttpStatusCode.BadRequest, response.status())

@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CreateOperatorDto(
-    val name: String,
+    val login: String,
+    val password: String,
 )

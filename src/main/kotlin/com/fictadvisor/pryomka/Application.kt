@@ -13,7 +13,7 @@ fun main() {
     embeddedServer(Netty, port = Environment.PORT, host = Environment.HOST) {
         initDB()
         install(ContentNegotiation) { json() }
-        configureSecurity()
+        configureSecurity(Provider.authUseCase)
         configureRouting()
     }.start(wait = true)
 }

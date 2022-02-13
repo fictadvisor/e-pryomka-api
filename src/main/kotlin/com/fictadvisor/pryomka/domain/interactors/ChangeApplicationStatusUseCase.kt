@@ -27,8 +27,10 @@ class ChangeApplicationStatusUseCaseImpl(
         newStatus: Status,
         statusMsg: String?,
     ) {
-        val user = userDataSource.findUser(userId) ?: unauthorized()
-        val application = if (user.role == User.Role.Entrant) {
+        val user = userDataSource.findEntrant(userId) ?:
+            userDataSource.findStaff(userId)
+            ?: unauthorized()
+        val application = if (user.isEntrant) {
             applicationDataSource.get(applicationId, userId) ?: notfound("Can't find application")
         } else {
             applicationDataSource.getById(applicationId) ?: notfound("Can't find application")
@@ -36,10 +38,10 @@ class ChangeApplicationStatusUseCaseImpl(
         if (application.status == newStatus) permissionDenied("Can't change to this status")
         val msg = statusMsg.takeIf { newStatus == Status.Rejected }
 
-        when (user.role) {
-            User.Role.Entrant -> changeStatusEntrant(application, newStatus)
-            User.Role.Operator -> changeStatusOperator(application, user.id, newStatus, msg)
-            User.Role.Admin -> changeStatusAdmin(application, user.id, newStatus, msg)
+        when {
+            user.isEntrant -> changeStatusEntrant(application, newStatus)
+            user.isOperator -> changeStatusOperator(application, user.id, newStatus, msg)
+            user.isAdmin -> changeStatusAdmin(application, user.id, newStatus, msg)
         }
     }
 

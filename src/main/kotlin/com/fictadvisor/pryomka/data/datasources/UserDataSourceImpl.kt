@@ -2,7 +2,7 @@ package com.fictadvisor.pryomka.data.datasources
 
 import com.fictadvisor.pryomka.data.db.Entrants
 import com.fictadvisor.pryomka.data.db.Staff
-import com.fictadvisor.pryomka.data.encryption.PasswordCrypt
+import com.fictadvisor.pryomka.data.encryption.Hash
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.models.User
 import com.fictadvisor.pryomka.domain.models.UserIdentifier
@@ -44,7 +44,7 @@ class UserDataSourceImpl(
             val hashedPassword = it[Staff.password]
             val salt = it[Staff.salt]
 
-            if (password == null || PasswordCrypt.verify(password, hashedPassword, salt)) {
+            if (password == null || Hash.verify(password, hashedPassword, salt)) {
                 User(UserIdentifier(it[Staff.id]), login, it[Staff.role])
             } else {
                 null
@@ -80,8 +80,8 @@ class UserDataSourceImpl(
         password: String,
         role: User.Role,
     ): Unit = newSuspendedTransaction(dispatchers) {
-        val salt = PasswordCrypt.generateSalt()
-        val hashedPassword = PasswordCrypt.hashPassword(password, salt)
+        val salt = Hash.generateSalt()
+        val hashedPassword = Hash.hash(password, salt)
 
         Staff.insert {
             it[Staff.login] = login

@@ -1,5 +1,6 @@
 package com.fictadvisor.pryomka
 
+import ch.qos.logback.core.subst.Token
 import com.fictadvisor.pryomka.data.datasources.*
 import com.fictadvisor.pryomka.domain.datasource.*
 import com.fictadvisor.pryomka.domain.interactors.*
@@ -26,7 +27,7 @@ object Provider {
     }
 
     val authUseCase: AuthUseCase by lazy {
-        AuthUseCaseImpl(userDataSource)
+        AuthUseCaseImpl(userDataSource, tokenDataSource)
     }
 
     val registerStaffUseCase: RegisterStaffUseCase by lazy {
@@ -42,4 +43,6 @@ object Provider {
         DocumentMetadataDataSourceImpl()
     }
     private val reviewsDataSource: ReviewsDataSource by lazy { ReviewsDataSourceImpl() }
+
+    private val tokenDataSource: TokenDataSource by lazy { TokenDataSourceImpl() }
 }

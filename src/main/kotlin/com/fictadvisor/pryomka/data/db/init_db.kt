@@ -32,5 +32,6 @@ private fun createTables() = transaction {
         Documents,
         Applications,
         Reviews,
+        Tokens,
     )
 }

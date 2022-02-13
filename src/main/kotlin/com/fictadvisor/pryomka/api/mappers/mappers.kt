@@ -1,9 +1,6 @@
 package com.fictadvisor.pryomka.api.mappers
 
-import com.fictadvisor.pryomka.api.dto.ApplicationRequestDto
-import com.fictadvisor.pryomka.api.dto.ApplicationResponseDto
-import com.fictadvisor.pryomka.api.dto.UserDto
-import com.fictadvisor.pryomka.api.dto.UserListDto
+import com.fictadvisor.pryomka.api.dto.*
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.UserIdentifier
 import com.fictadvisor.pryomka.domain.models.generateApplicationId
@@ -40,3 +37,5 @@ fun List<User>.toUserListDto() = UserListDto(
         )
     }
 )
+
+fun User.toWhoAmIDto() = WhoAmIDto(id.value.toString(), name, role)

@@ -14,6 +14,7 @@ fun Application.configureRouting() {
     routing {
         authenticate(AUTH_GENERAL) {
             generalApplicationsRouters()
+            meRoute()
         }
 
         authenticate(AUTH_ADMIN) {
@@ -28,7 +29,7 @@ fun Application.configureRouting() {
             myApplicationsRouters()
         }
 
-        loginRouters()
+        authRouters()
 
         get("/") {
             call.respondText("Welcome to FICT!")

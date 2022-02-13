@@ -2,6 +2,7 @@ package com.fictadvisor.pryomka.data.db
 
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.DocumentType
+import com.fictadvisor.pryomka.domain.models.TokenMetadata
 import com.fictadvisor.pryomka.domain.models.User
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.timestamp
@@ -54,4 +55,15 @@ object Reviews : Table() {
     val id = uuid("id").autoGenerate()
     val applicationId = uuid("application_id").uniqueIndex() references Applications.id
     val operatorId = uuid("operator_id") references Staff.id
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object Tokens : Table() {
+    val id = integer("id").autoIncrement()
+    val token = varchar("token", 128).uniqueIndex()
+    val salt = varchar("salt",  32)
+    val userId = uuid("user_id")
+    val validUntil = timestamp("valid_until")
+    val type = enumeration("type", TokenMetadata.Type::class)
 }

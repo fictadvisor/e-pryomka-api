@@ -11,7 +11,10 @@ object Environment {
     val JWT_ISSUER get() = env["JWT_ISSUER"] ?: "https://vstup.fictadvisor.com/"
     val JWT_AUDIENCE get() = env["JWT_AUDIENCE"] ?: "https://vstup.fictadvisor.com/api/"
     val JWT_REALM get() = env["JWT_REALM"] ?: "Access to api"
-    val JWT_EXPIRATION_TIME get() = env["JWT_EXPIRATION_TIME"]?.toInt() ?: 900_000
+    val JWT_ACCESS_TOKEN_EXPIRATION_TIME
+        get() = env["JWT_ACCESS_TOKEN_EXPIRATION_TIME"]?.toLong() ?: 900_000L // 15 min
+    val JWT_REFRESH_TOKEN_EXPIRATION_TIME
+        get() = env["JWT_REFRESH_TOKEN_EXPIRATION_TIME"]?.toLong() ?: 64_800_000L // 18 hours
 
     // DB
     val DB_SOURCE_CLASS_NAME get() = env["DB_SOURCE_CLASS_NAME"] ?: "org.postgresql.ds.PGSimpleDataSource"

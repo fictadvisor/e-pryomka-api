@@ -9,7 +9,6 @@ import java.io.InputStream
 
 interface GetDocumentsUseCase {
     suspend fun get(applicationId: ApplicationIdentifier, type: DocumentType): Pair<DocumentMetadata, InputStream>?
-    suspend fun getAll(applicationId: ApplicationIdentifier)
 }
 
 class GetDocumentsUseCaseImpl(
@@ -24,9 +23,5 @@ class GetDocumentsUseCaseImpl(
         val content = documentsContentDS.get(metadata)
 
         return metadata to content
-    }
-
-    override suspend fun getAll(applicationId: ApplicationIdentifier) {
-        TODO("Not yet implemented")
     }
 }

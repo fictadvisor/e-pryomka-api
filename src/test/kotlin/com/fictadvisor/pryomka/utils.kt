@@ -15,6 +15,9 @@ import kotlinx.serialization.json.Json
 import org.mockito.Mockito
 
 internal inline fun <reified T> any(): T = Mockito.any(T::class.java)
+internal inline fun <reified T> mock(): T = Mockito.mock(T::class.java)
+internal fun <T> whenever(methodCall: T) = Mockito.`when`(methodCall)
+internal fun <T> verify(mock: T, times: Int = 1) = Mockito.verify(mock, Mockito.times(times))
 
 internal inline fun withRouters(
     crossinline endpoints: Route.() -> Unit,
@@ -36,11 +39,24 @@ internal inline fun <reified T> TestApplicationRequest.setJsonBody(body: T) = se
     Json.encodeToString(body)
 )
 
-fun user(
+fun entrant(
     id: UserIdentifier = generateUserId(),
-    name: String = "",
-    role: User.Role = User.Role.Entrant,
-) = User(id, name, role)
+    telegramId: Long = 1,
+    firstName: String = "Lelouch",
+    lastName: String? = "Lamperouge",
+    userName: String? = "lelouch",
+    photoUrl: String? = "http://photos.com/lelouch"
+) = User.Entrant(id, telegramId, firstName, lastName, userName, photoUrl)
+
+fun operator(
+    id: UserIdentifier = generateUserId(),
+    name: String = "lelouch",
+) = User.Staff(id, name, User.Staff.Role.Operator)
+
+fun admin(
+    id: UserIdentifier = generateUserId(),
+    name: String = "lelouch",
+) = User.Staff(id, name, User.Staff.Role.Admin)
 
 fun application(
     id: ApplicationIdentifier = generateApplicationId(),
@@ -61,5 +77,5 @@ fun application(
     learningFormat = learningFormat,
     createdAt = createdAt,
     status = status,
-    statusMsg = statusMsg,
+    statusMessage = statusMsg,
 )

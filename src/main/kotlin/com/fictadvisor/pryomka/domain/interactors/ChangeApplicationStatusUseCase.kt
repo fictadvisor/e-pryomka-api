@@ -11,7 +11,7 @@ interface ChangeApplicationStatusUseCase {
         applicationId: ApplicationIdentifier,
         userId: UserIdentifier,
         newStatus: Status,
-        statusMsg: String?,
+        statusMessage: String?,
     )
 }
 
@@ -25,24 +25,33 @@ class ChangeApplicationStatusUseCaseImpl(
         applicationId: ApplicationIdentifier,
         userId: UserIdentifier,
         newStatus: Status,
-        statusMsg: String?,
+        statusMessage: String?,
     ) {
-        val user = userDataSource.findEntrant(userId) ?:
-            userDataSource.findStaff(userId)
-            ?: unauthorized()
-        val application = if (user.isEntrant) {
-            applicationDataSource.get(applicationId, userId) ?: notfound("Can't find application")
-        } else {
-            applicationDataSource.getById(applicationId) ?: notfound("Can't find application")
-        }
-        if (application.status == newStatus) permissionDenied("Can't change to this status")
-        val msg = statusMsg.takeIf { newStatus == Status.Rejected }
+        val user = resolveUser(userId)
+        val application = resolveApplication(user, applicationId).takeIf {
+            it.status != newStatus
+        } ?: permissionDenied("Can't change to this status")
+
+        val message = statusMessage.takeIf { newStatus == Status.Rejected }
 
         when {
             user.isEntrant -> changeStatusEntrant(application, newStatus)
-            user.isOperator -> changeStatusOperator(application, user.id, newStatus, msg)
-            user.isAdmin -> changeStatusAdmin(application, user.id, newStatus, msg)
+            user.isOperator -> changeStatusOperator(application, user.id, newStatus, message)
+            user.isAdmin -> changeStatusAdmin(application, user.id, newStatus, message)
         }
+    }
+
+    private suspend fun resolveUser(userId: UserIdentifier) = userDataSource.findEntrant(userId)
+        ?: userDataSource.findStaff(userId)
+        ?: unauthorized()
+
+    private suspend fun resolveApplication(
+        user: User,
+        applicationId: ApplicationIdentifier,
+    ) = if (user.isEntrant) {
+        applicationDataSource.get(applicationId, user.id) ?: notfound("Can't find application")
+    } else {
+        applicationDataSource.getById(applicationId) ?: notfound("Can't find application")
     }
 
     private suspend fun changeStatusEntrant(

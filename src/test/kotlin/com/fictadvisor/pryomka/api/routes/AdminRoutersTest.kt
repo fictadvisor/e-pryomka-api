@@ -25,9 +25,9 @@ class AdminRoutersTest {
     fun `test GET operators`() = runBlocking {
         // GIVEN
         val users = listOf(
-            User(generateUserId(), "User 1", User.Role.Operator),
-            User(generateUserId(), "User 2", User.Role.Operator),
-            User(generateUserId(), "User 3", User.Role.Operator),
+            User.Staff(generateUserId(), "User 1", User.Staff.Role.Operator),
+            User.Staff(generateUserId(), "User 2", User.Staff.Role.Operator),
+            User.Staff(generateUserId(), "User 3", User.Staff.Role.Operator),
         )
 
         Mockito.`when`(useCase.getAll()).thenReturn(users)
@@ -46,7 +46,7 @@ class AdminRoutersTest {
     @Test
     fun `test GET operators - no operators`() = runBlocking {
         // GIVEN
-        val users = listOf<User>()
+        val users = listOf<User.Staff>()
 
         Mockito.`when`(useCase.getAll()).thenReturn(users)
 
@@ -64,20 +64,26 @@ class AdminRoutersTest {
     @Test
     fun `test POST operators`() = runBlocking {
         // GIVEN
-        Mockito.`when`(useCase.add(any())).thenReturn(Unit)
+        Mockito.`when`(useCase.add(any(), any())).thenReturn(
+            User.Staff(
+                id = generateUserId(),
+                name = "Lelouch Lamperouge",
+                role = User.Staff.Role.Operator
+            )
+        )
 
         // WHEN + THEN
         withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Post, "/operators") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setJsonBody(CreateOperatorDto("Lelouch Lamperouge"))
+                setJsonBody(CreateOperatorDto("lelouch", "lamperouge"))
             }
 
             with(call) {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertTrue(response.content.isNullOrEmpty())
                 runBlocking {
-                    Mockito.verify(useCase, times(1)).add(any())
+                    Mockito.verify(useCase, times(1)).add(any(), any())
                 }
             }
         }
@@ -88,19 +94,54 @@ class AdminRoutersTest {
     @Test
     fun `test POST operators - empty name`() = runBlocking {
         // GIVEN
-        Mockito.`when`(useCase.add(any())).thenReturn(Unit)
+        Mockito.`when`(useCase.add(any(), any())).thenReturn(
+            User.Staff(
+                id = generateUserId(),
+                name = "Lelouch Lamperouge",
+                role = User.Staff.Role.Operator
+            )
+        )
 
         // WHEN + THEN
         withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Post, "/operators") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setJsonBody(CreateOperatorDto(""))
+                setJsonBody(CreateOperatorDto("", "lamperouge"))
             }
 
             with(call) {
                 assertEquals(HttpStatusCode.BadRequest, response.status())
                 runBlocking {
-                    Mockito.verify(useCase, times(0)).add(any())
+                    Mockito.verify(useCase, times(0)).add(any(), any())
+                }
+            }
+        }
+
+        return@runBlocking
+    }
+
+    @Test
+    fun `test POST operators - empty password`() = runBlocking {
+        // GIVEN
+        Mockito.`when`(useCase.add(any(), any())).thenReturn(
+            User.Staff(
+                id = generateUserId(),
+                name = "Lelouch Lamperouge",
+                role = User.Staff.Role.Operator
+            )
+        )
+
+        // WHEN + THEN
+        withRouters({ operatorsRoutes(useCase) }) {
+            val call = handleRequest(HttpMethod.Post, "/operators") {
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setJsonBody(CreateOperatorDto("lamperouge", ""))
+            }
+
+            with(call) {
+                assertEquals(HttpStatusCode.BadRequest, response.status())
+                runBlocking {
+                    Mockito.verify(useCase, times(0)).add(any(), any())
                 }
             }
         }
@@ -111,13 +152,13 @@ class AdminRoutersTest {
     @Test
     fun `test POST operators - duplicated user`() = runBlocking {
         // GIVEN
-        Mockito.`when`(useCase.add(any())).thenThrow(IllegalStateException("User already exists"))
+        Mockito.`when`(useCase.add(any(), any())).thenThrow(IllegalStateException("User already exists"))
 
         // WHEN + THEN
         withRouters({ operatorsRoutes(useCase) }) {
             val call = handleRequest(HttpMethod.Post, "/operators") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setJsonBody(CreateOperatorDto("Lelouch vi Britannia"))
+                setJsonBody(CreateOperatorDto("Lelouch", "vi_Britannia"))
             }
 
             with(call) {

@@ -8,13 +8,13 @@ interface RegisterStaffUseCase {
         login: String,
         password: String,
         role: User.Staff.Role,
-    ): User
+    ): User.Staff
 }
 
 class RegisterStaffUseCaseImpl(
     private val userDataSource: UserDataSource
 ) : RegisterStaffUseCase {
-    override suspend fun register(login: String, password: String, role: User.Staff.Role): User {
+    override suspend fun register(login: String, password: String, role: User.Staff.Role): User.Staff {
         if (role == User.Staff.Role.Admin) {
             val admins = userDataSource.findAllByRole(User.Staff.Role.Admin)
 

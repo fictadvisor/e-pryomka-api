@@ -1,9 +1,8 @@
 package com.fictadvisor.pryomka.domain.interactors
 
-import com.fictadvisor.pryomka.any
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.models.User
-import com.fictadvisor.pryomka.domain.models.generateUserId
+import com.fictadvisor.pryomka.operator
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
@@ -12,140 +11,85 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class OperatorManagementUseCaseImplTest {
-    private val ds = Mockito.mock(UserDataSource::class.java)
-    private val useCase = OperatorManagementUseCaseImpl(ds)
+    private val userDataSource = Mockito.mock(UserDataSource::class.java)
+    private val registerStaffUseCase = Mockito.mock(RegisterStaffUseCase::class.java)
+    private val useCase = OperatorManagementUseCaseImpl(userDataSource, registerStaffUseCase)
+
+    private val login = "lelouch"
+    private val password = "lamperouge"
+    private val operator = operator(name = login)
 
     @Test
-    fun `test add user`() = runBlocking {
+    fun `should register operator`(): Unit = runBlocking {
         // GIVEN
-        Mockito.`when`(ds.findUser(any<String>())).thenReturn(null)
-        Mockito.`when`(ds.addUser(any())).thenReturn(Unit)
+        Mockito.`when`(userDataSource.findStaffByCredentials(login, password))
+            .thenReturn(null)
+        Mockito.`when`(registerStaffUseCase.register(login, password, User.Staff.Role.Operator))
+            .thenReturn(operator)
 
         // WHEN
-        useCase.add("C.C.")
+        useCase.add(login, password)
 
         // THEN
-        Mockito.verify(ds, times(1)).addUser(any())
+        Mockito.verify(userDataSource, times(1))
+            .findStaffByCredentials(login, null)
+        Mockito.verify(registerStaffUseCase, times(1))
+            .register(login, password, User.Staff.Role.Operator)
     }
 
     @Test
-    fun `test add duplicated user`() = runBlocking {
+    fun `register duplicated operator`(): Unit = runBlocking {
         // GIVEN
-        Mockito.`when`(ds.findUser(any<String>())).thenReturn(User(
-            id = generateUserId(),
-            name = "C.C.",
-            role = User.Role.Operator,
-        ))
+        Mockito.`when`(userDataSource.findStaffByCredentials(login, null)).thenReturn(operator)
 
         // WHEN + THEN
-        assertThrows<IllegalStateException> {
-            useCase.add("C.C.")
-        }
-
-        return@runBlocking
+        assertThrows<IllegalStateException> { useCase.add(login, password) }
     }
 
     @Test
-    fun `test get all operators`() = runBlocking {
+    fun `get all operators`(): Unit = runBlocking {
         // GIVEN
         val operators = listOf(
-            User(
-                id = generateUserId(),
-                name = "C.C.",
-                role = User.Role.Operator,
-            ),
-            User(
-                id = generateUserId(),
-                name = "Shirley Fenette",
-                role = User.Role.Operator,
-            ),
-            User(
-                id = generateUserId(),
-                name = "Euphemia li Britannia",
-                role = User.Role.Operator,
-            )
+            operator(name = "C.C."),
+            operator(name = "Shirley"),
+            operator(name = "Euphemia")
         )
-        Mockito.`when`(ds.findByRole(User.Role.Operator)).thenReturn(operators)
+        Mockito.`when`(userDataSource.findAllByRole(User.Staff.Role.Operator)).thenReturn(operators)
+
+        // WHEN+THEN
+        assertEquals(operators, useCase.getAll())
+    }
+
+    @Test
+    fun `get all operators when list is empty`() = runBlocking {
+        // GIVEN
+        Mockito.`when`(userDataSource.findAllByRole(User.Staff.Role.Operator)).thenReturn(listOf())
+
+        // WHEN+THEN
+        assertEquals(listOf(), useCase.getAll())
+    }
+
+    @Test
+    fun `delete operator`(): Unit = runBlocking {
+        // GIVEN
+        Mockito.`when`(userDataSource.deleteStaff(operator.id)).thenReturn(Unit)
 
         // WHEN
-        val received = useCase.getAll()
+        useCase.delete(operator.id)
 
         // THEN
-        assertEquals(operators, received)
+        Mockito.verify(userDataSource, times(1)).deleteStaff(operator.id)
     }
 
     @Test
-    fun `test get all operators when list is empty`() = runBlocking {
+    fun `should return nothing on delete non-existing operator`(): Unit = runBlocking {
         // GIVEN
-        val operators = listOf<User>()
-        Mockito.`when`(ds.findByRole(User.Role.Operator)).thenReturn(operators)
+        Mockito.`when`(userDataSource.deleteStaff(operator.id)).thenReturn(Unit)
 
         // WHEN
-        val received = useCase.getAll()
+        useCase.delete(operator.id)
 
         // THEN
-        assertEquals(operators, received)
-    }
-
-    @Test
-    fun `test delete operator`() = runBlocking {
-        // GIVEN
-        val user = User(
-            id = generateUserId(),
-            name = "Charles zi Britannia",
-            role = User.Role.Operator
-        )
-
-        Mockito.`when`(ds.findUser(user.id)).thenReturn(user)
-        Mockito.`when`(ds.deleteUser(user)).thenReturn(Unit)
-
-        // WHEN
-        useCase.delete(user.id)
-
-        // THEN
-        Mockito.verify(ds, times(1)).findUser(user.id)
-        Mockito.verify(ds, times(1)).deleteUser(user)
-
-        return@runBlocking
-    }
-
-    @Test
-    fun `test delete non-existing operator`() = runBlocking {
-        // GIVEN
-        val user = User(
-            id = generateUserId(),
-            name = "Charles zi Britannia",
-            role = User.Role.Operator
-        )
-
-        Mockito.`when`(ds.findUser(user.id)).thenReturn(null)
-
-        // WHEN + THEN
-        assertThrows<IllegalStateException> {
-            useCase.delete(user.id)
-        }
-
-        Mockito.verify(ds, times(0)).deleteUser(user)
-        return@runBlocking
-    }
-
-    @Test
-    fun `test delete user that is not an operator`() = runBlocking {
-        // GIVEN
-        val user = User(
-            id = generateUserId(),
-            name = "Charles zi Britannia",
-            role = User.Role.Admin
-        )
-
-        Mockito.`when`(ds.findUser(user.id)).thenReturn(user)
-
-        // WHEN + THEN
-        assertThrows<IllegalStateException> {
-            useCase.delete(user.id)
-        }
-
-        Mockito.verify(ds, times(0)).deleteUser(user)
-        return@runBlocking
+        Mockito.verify(userDataSource, times(1)).deleteStaff(operator.id)
     }
 }

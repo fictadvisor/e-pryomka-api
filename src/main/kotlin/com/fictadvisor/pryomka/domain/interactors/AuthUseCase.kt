@@ -17,6 +17,8 @@ import javax.crypto.spec.SecretKeySpec
 import kotlin.text.toByteArray
 
 interface AuthUseCase {
+    val config: Config
+
     /** @return [Pair] where [Pair.first] is an access token and [Pair.second] is a refresh token */
     suspend fun logIn(login: String, password: String): Pair<String, String>
 
@@ -36,11 +38,34 @@ interface AuthUseCase {
      *
      * @return [Pair] where [Pair.first] is an access token and [Pair.second] is a refresh token */
     suspend fun exchange(telegramData: Map<String, String>): Pair<String, String>
+
+    data class Config(
+        val accessTTL: Long,
+        val refreshTTL: Long,
+        val audience: String,
+        val issuer: String,
+        val secret: String,
+        val realm: String,
+        val tgBotId: String,
+    ) {
+        companion object {
+            val DEFAULT get() = Config(
+                accessTTL = Environment.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+                refreshTTL = Environment.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+                audience = Environment.JWT_AUDIENCE,
+                issuer = Environment.JWT_ISSUER,
+                secret = Environment.JWT_SECRET,
+                realm = Environment.JWT_REALM,
+                tgBotId = Environment.TG_BOT_ID,
+            )
+        }
+    }
 }
 
 class AuthUseCaseImpl(
     private val userDataSource: UserDataSource,
     private val tokenDataSource: TokenDataSource,
+    override val config: AuthUseCase.Config = AuthUseCase.Config.DEFAULT
 ) : AuthUseCase {
     override suspend fun logIn(login: String, password: String): Pair<String, String> {
         val user = userDataSource.findStaffByCredentials(login, password) ?: error("User not found")
@@ -59,7 +84,7 @@ class AuthUseCaseImpl(
     }
 
     override suspend fun auth(token: String): Boolean {
-        val (_, validUntil) = tokenDataSource.findAccessToken(token) ?: error("Token not found")
+        val (_, validUntil) = tokenDataSource.findAccessToken(token) ?: return false
 
         val tokenValid = Date().before(validUntil)
 
@@ -73,8 +98,7 @@ class AuthUseCaseImpl(
     }
 
     override suspend fun getMe(token: String): User? {
-        val (userId, validUntil) = tokenDataSource.findAccessToken(token)
-            ?: error("Token not found")
+        val (userId, validUntil) = tokenDataSource.findAccessToken(token) ?: return null
 
         if (!Date().before(validUntil)) return null
 
@@ -115,15 +139,15 @@ class AuthUseCaseImpl(
 
     private fun generateAccessToken(userId: UserIdentifier): Pair<String, Date> {
         val validUntil = Date(
-            System.currentTimeMillis() + Environment.JWT_ACCESS_TOKEN_EXPIRATION_TIME
+            System.currentTimeMillis() + config.accessTTL
         )
 
         val token = JWT.create()
-            .withAudience(Environment.JWT_AUDIENCE)
-            .withIssuer(Environment.JWT_ISSUER)
+            .withAudience(config.audience)
+            .withIssuer(config.issuer)
             .withClaim("user_id", userId.value.toString())
             .withExpiresAt(validUntil)
-            .sign(Algorithm.HMAC256(Environment.JWT_SECRET))
+            .sign(Algorithm.HMAC256(config.secret))
 
         return token to validUntil
     }
@@ -132,9 +156,9 @@ class AuthUseCaseImpl(
         val header = UUID.randomUUID().toString().toByteArray()
         val payload = UUID.randomUUID().toString().toByteArray()
 
-        val signed = Algorithm.HMAC256(Environment.JWT_SECRET).sign(header, payload)
+        val signed = Algorithm.HMAC256(config.secret).sign(header, payload)
         val validUntil = Date(
-            System.currentTimeMillis() + Environment.JWT_REFRESH_TOKEN_EXPIRATION_TIME
+            System.currentTimeMillis() + config.refreshTTL
         )
 
         return Base64.getEncoder().encodeToString(signed) to validUntil
@@ -154,7 +178,7 @@ class AuthUseCaseImpl(
 
         val sha256 = MessageDigest.getInstance("SHA-256")
         val secretKey = SecretKeySpec(
-            sha256.digest(Environment.TG_BOT_ID.toByteArray()),
+            sha256.digest(config.tgBotId.toByteArray()),
             "HmacSHA256"
         )
 

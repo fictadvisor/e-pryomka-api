@@ -3,7 +3,6 @@ package com.fictadvisor.pryomka.api
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.Payload
-import com.fictadvisor.pryomka.Environment
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCase
 import com.fictadvisor.pryomka.domain.models.toUserIdentifierOrNull
 import io.ktor.application.*
@@ -16,9 +15,9 @@ const val AUTH_OPERATOR = "operator"
 const val AUTH_ADMIN = "admin"
 
 fun Application.configureSecurity(authUseCase: AuthUseCase) {
-    fun jwt() = JWT.require(Algorithm.HMAC256(Environment.JWT_SECRET))
-        .withAudience(Environment.JWT_AUDIENCE)
-        .withIssuer(Environment.JWT_ISSUER)
+    fun jwt() = JWT.require(Algorithm.HMAC256(authUseCase.config.secret))
+        .withAudience(authUseCase.config.audience)
+        .withIssuer(authUseCase.config.issuer)
         .build()
 
     suspend fun Payload.user() = getClaim("user_id").asString()
@@ -27,7 +26,7 @@ fun Application.configureSecurity(authUseCase: AuthUseCase) {
 
     install(Authentication) {
         jwt(AUTH_GENERAL) {
-            realm = Environment.JWT_REALM
+            realm = authUseCase.config.realm
             verifier(jwt())
 
             validate { credential -> credential.payload
@@ -37,7 +36,7 @@ fun Application.configureSecurity(authUseCase: AuthUseCase) {
         }
 
         jwt(AUTH_ADMIN) {
-            realm = Environment.JWT_REALM
+            realm = authUseCase.config.realm
             verifier(jwt())
 
             validate { credential -> credential.payload
@@ -48,7 +47,7 @@ fun Application.configureSecurity(authUseCase: AuthUseCase) {
         }
 
         jwt(AUTH_OPERATOR) {
-            realm = Environment.JWT_REALM
+            realm = authUseCase.config.realm
             verifier(jwt())
 
             validate { credential -> credential.payload
@@ -59,7 +58,7 @@ fun Application.configureSecurity(authUseCase: AuthUseCase) {
         }
 
         jwt(AUTH_ENTRANT) {
-            realm = Environment.JWT_REALM
+            realm = authUseCase.config.realm
             verifier(jwt())
 
             validate { credential -> credential.payload

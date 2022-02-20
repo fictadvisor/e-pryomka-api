@@ -9,7 +9,9 @@ import com.fictadvisor.pryomka.domain.models.generateUserId
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import org.mockito.Mockito.times
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ApplicationUseCaseImplTest {
     private val ds = Mockito.mock(ApplicationDataSource::class.java)
@@ -113,5 +115,92 @@ class ApplicationUseCaseImplTest {
         // then
         Mockito.verify(ds, Mockito.times(1))
             .create(newApplication)
+    }
+
+    @Test
+    fun `test get application by user id`(): Unit = runBlocking {
+        // GIVEN
+        val id = generateUserId()
+        val applications = listOf(
+            application(
+                funding = Application.Funding.Budget,
+                learningFormat = Application.LearningFormat.FullTime,
+                speciality = Application.Speciality.SPEC_121,
+                status = Application.Status.Cancelled,
+            ),
+            application(
+                funding = Application.Funding.Budget,
+                learningFormat = Application.LearningFormat.FullTime,
+                speciality = Application.Speciality.SPEC_121,
+                status = Application.Status.Rejected,
+            ),
+        )
+
+        Mockito.`when`(ds.getByUserId(id)).thenReturn(applications)
+
+        // WHEN+THEN
+        assertEquals(applications, useCase.getByUserId(id))
+        Mockito.verify(ds, times(1)).getByUserId(id)
+    }
+
+    @Test
+    fun `test get application by application id`(): Unit = runBlocking {
+        // GIVEN
+        val id = generateApplicationId()
+        val application = application(
+            funding = Application.Funding.Budget,
+            learningFormat = Application.LearningFormat.FullTime,
+            speciality = Application.Speciality.SPEC_121,
+            status = Application.Status.Cancelled,
+        )
+
+        Mockito.`when`(ds.getById(id)).thenReturn(application)
+
+        // WHEN+THEN
+        assertEquals(application, useCase.getById(id))
+        Mockito.verify(ds, times(1)).getById(id)
+    }
+
+    @Test
+    fun `test get application`(): Unit = runBlocking {
+        // GIVEN
+        val userId = generateUserId()
+        val application = application(
+            funding = Application.Funding.Budget,
+            learningFormat = Application.LearningFormat.FullTime,
+            speciality = Application.Speciality.SPEC_121,
+            status = Application.Status.Cancelled,
+        )
+
+        Mockito.`when`(ds.get(application.id, userId)).thenReturn(application)
+
+        // WHEN+THEN
+        assertEquals(application, useCase.get(application.id, userId))
+        Mockito.verify(ds, times(1)).get(application.id, userId)
+    }
+
+    @Test
+    fun `test get all applications`(): Unit = runBlocking {
+        // GIVEN
+        val applications = listOf(
+            application(
+                funding = Application.Funding.Budget,
+                learningFormat = Application.LearningFormat.FullTime,
+                speciality = Application.Speciality.SPEC_121,
+                status = Application.Status.Cancelled,
+            ),
+            application(
+                funding = Application.Funding.Budget,
+                learningFormat = Application.LearningFormat.FullTime,
+                speciality = Application.Speciality.SPEC_121,
+                status = Application.Status.Rejected,
+            ),
+        )
+
+        Mockito.`when`(ds.getAll()).thenReturn(applications)
+
+        // WHEN+THEN
+        assertEquals(applications, useCase.getAll())
+        Mockito.verify(ds, times(1)).getAll()
     }
 }

@@ -36,7 +36,7 @@ object Applications : Table() {
     val learningFormat = enumeration("learning_format", Application.LearningFormat::class)
     val createdAt = timestamp("creation_time")
     val status = enumeration("status", Application.Status::class)
-    val statusMsg = varchar("status_msg", 256).nullable().default(null)
+    val statusMessage = varchar("status_message", 256).nullable().default(null)
 
     override val primaryKey = PrimaryKey(id)
 }

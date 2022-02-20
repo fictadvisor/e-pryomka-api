@@ -5,9 +5,6 @@ import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
 import com.fictadvisor.pryomka.domain.models.UserIdentifier
 import com.fictadvisor.pryomka.domain.models.duplicate
-import io.ktor.application.*
-import io.ktor.http.*
-import io.ktor.response.*
 
 interface ApplicationUseCase {
     suspend fun getByUserId(userId: UserIdentifier): List<Application>

@@ -10,5 +10,9 @@ interface ApplicationDataSource {
     suspend fun getById(applicationId: ApplicationIdentifier): Application?
     suspend fun getAll(): List<Application>
     suspend fun create(application: Application)
-    suspend fun changeStatus(applicationId: ApplicationIdentifier, status: Application.Status, statusMsg: String?)
+    suspend fun changeStatus(
+        applicationId: ApplicationIdentifier,
+        status: Application.Status,
+        statusMessage: String?,
+    )
 }

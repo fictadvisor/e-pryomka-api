@@ -9,6 +9,7 @@ import kotlinx.datetime.Clock
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 internal class UtilsKtTest {
     @Test
@@ -33,5 +34,26 @@ internal class UtilsKtTest {
         assertEquals(Environment.UPLOADS_DIR, baseDir)
         assertEquals(application.id.value.toString(), applicationDir)
         assertEquals("Passport_passport.png", fileName)
+    }
+
+    @Test
+    fun `test String toUUIDOrNull - general case`() {
+        // GIVEN
+        val string = "b7ca4bcb-766f-4554-b30b-2950fffaad1b"
+
+        // WHEN+THEN
+        assertEquals(
+            UUID.fromString("b7ca4bcb-766f-4554-b30b-2950fffaad1b"),
+            string.toUUIDOrNull()
+        )
+    }
+
+    @Test
+    fun `test String toUUIDOrNull - invalid string`() {
+        // GIVEN
+        val string = "oh no"
+
+        // WHEN+THEN
+        assertNull(string.toUUIDOrNull())
     }
 }

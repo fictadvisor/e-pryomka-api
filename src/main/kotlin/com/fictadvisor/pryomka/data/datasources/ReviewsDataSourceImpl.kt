@@ -1,9 +1,7 @@
 package com.fictadvisor.pryomka.data.datasources
 
-import com.fictadvisor.pryomka.data.db.Applications
 import com.fictadvisor.pryomka.data.db.Reviews
 import com.fictadvisor.pryomka.domain.datasource.ReviewsDataSource
-import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
 import com.fictadvisor.pryomka.domain.models.UserIdentifier
 import kotlinx.coroutines.CoroutineDispatcher

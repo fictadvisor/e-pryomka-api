@@ -11,7 +11,7 @@ data class Application(
     val learningFormat: LearningFormat,
     val createdAt: Instant,
     val status: Status,
-    val statusMsg: String? = null,
+    val statusMessage: String? = null,
 ) {
     enum class Status {
         Preparing,

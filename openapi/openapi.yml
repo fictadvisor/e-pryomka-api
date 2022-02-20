@@ -12,6 +12,7 @@ info:
     url: "https://github.com/fictadvisor/e-pryomka/blob/main/LICENSE"
 
 servers:
+  - url: "https://fict.bar"
   - url: "http://localhost:8080"
 
 components:

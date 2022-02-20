@@ -1,0 +1,9 @@
+{
+  "name": "e-pryomka",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.17.3",
+    "swagger-ui-express": "^4.3.0",
+    "yamljs": "^0.3.0"
+  }
+}

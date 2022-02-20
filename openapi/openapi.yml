@@ -1,0 +1,200 @@
+openapi: "3.0.2"
+
+info: 
+  title: "e-pryomka"
+  description: "An automated system for entrant application to FICT, KPI."
+  version: "0.0.1"
+  contact:
+    name: "GitHub"
+    url: "https://github.com/fictadvisor/e-pryomka"
+  license: 
+    name: "GNU General Public License v3.0"
+    url: "https://github.com/fictadvisor/e-pryomka/blob/main/LICENSE"
+
+servers:
+  - url: "http://localhost:8080"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LogInRequestDto:
+      type: "object"
+      properties:
+        login:
+          type: "string"
+        password:
+          type: "string"
+      required: ["login", "password"]
+
+    LogInResponseDto:
+      type: "object"
+      properties:
+        access:
+          type: "string"
+        refresh:
+          type: "string"
+      required: ["access", "refresh"]
+    RefreshRequest:
+      type: "object"
+      properties:
+        refresh:
+          type: "string"
+      required: ["refresh"]
+    TelegramAuthData:
+      type: "object"
+      properties:
+        id:
+          type: "number"
+        first_name:
+          type: "string"
+        last_name:
+          type: "string"
+          nullable: true
+        user_name:
+          type: "string"
+          nullable: true
+        photo_url:
+          type: "string"
+          nullable: true
+        hash:
+          type: "string"
+      required: ["id", "first_name", "hash"]
+    WhoAmIDto:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        role:
+          type: "string"
+          enum: ["Operator", "Admin"]
+          nullable: true
+        photoUrl:
+          type: "string"
+          nullable: true
+      required: ["id", "name"]
+
+security:
+  - bearerAuth: []
+
+paths:
+  /:
+    get:
+      tags:
+        - Misc
+      summary: "Hello world endpoint"
+      security: []
+      responses:
+        200:
+          description: "Successful response"
+          content:
+            text/plain:
+              example: "🧑‍💻Welcome to FICT!🚀"
+  /me:
+    get:
+      tags:
+        - Misc
+      summary: "General info about current user"
+      responses:
+        200:
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WhoAmIDto'
+              example:
+                id: "30b00eac-6e5b-4263-aef3-bde3140d7eb6"
+                name: "operator1"
+                role: "Operator"
+                photoUrl: null
+        401:
+          description: "Authentication failed"
+  /login:
+    post: 
+      tags:
+        - Auth
+      summary: "Login with username and password"
+      description: "Login router for administrators and operators."
+      security: []
+      requestBody:
+        content:
+          application/json:
+              schema:
+                $ref: '#/components/schemas/LogInRequestDto'
+              example:
+                login: "operator1"
+                password: "password123"
+      responses:
+        200:
+          description: "Successful response contains JWT access token and refresh token."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogInResponseDto'
+              example:
+                access: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJodHRwczovL3ZzdHVwLmZpY3RhZHZpc29yLmNvbS9hcGkvIiwidXNlcl9pZCI6ImUxNGNmZGZmLTM1ZTEtNGNlYi05NzgwLTkyMDYxNjEwMjU3MiIsImlzcyI6Imh0dHBzOi8vdnN0dXAuZmljdGFkdmlzb3IuY29tLyIsImV4cCI6MTY0NTM0OTY0NH0.rxLeRplrgsl8VfSNZHqQegBdvPSGSFFpGcQmKN9bN8c"
+                refresh: "t5hsSBhlpS6fVu92go4liGbthT3ta6frmexqLaT674g="
+        401:
+          description: "Authentication failed. Login or password is invalid."
+  /refresh:
+    post: 
+      tags:
+        - Auth
+      summary: "Refresh tokens"
+      description: "Router for all users to renew their access and refresh tokens."
+      security: []
+      requestBody:
+        content:
+          application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshRequest'
+              example:
+                refresh: "t5hsSBhlpS6fVu92go4liGbthT3ta6frmexqLaT674g="
+      responses:
+        200:
+          description: "Successful response contains JWT access token and refresh token."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogInResponseDto'
+              example:
+                access: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJodHRwczovL3ZzdHVwLmZpY3RhZHZpc29yLmNvbS9hcGkvIiwidXNlcl9pZCI6ImUxNGNmZGZmLTM1ZTEtNGNlYi05NzgwLTkyMDYxNjEwMjU3MiIsImlzcyI6Imh0dHBzOi8vdnN0dXAuZmljdGFkdmlzb3IuY29tLyIsImV4cCI6MTY0NTM0OTY0NH0.rxLeRplrgsl8VfSNZHqQegBdvPSGSFFpGcQmKN9bN8c"
+                refresh: "t5hsSBhlpS6fVu92go4liGbthT3ta6frmexqLaT674g="
+        401:
+          description: "Authentication failed. Refesh token is not valid."
+  /exchange:
+    post: 
+      tags:
+        - Auth
+      summary: "Exchange Telegram Auth data to e-pryomka tokens"
+      description: "Router for entrants that log in via Telegram. Creates user if it is not registered yet. Returs access & refresh tokens"
+      security: []
+      requestBody:
+        content:
+          application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramAuthData'
+              example:
+                id: 100500
+                first_name: "test"
+                last_name: "test"
+                user_name: "croc"
+                hash: "e5dddc989e053723a9c346535d1324cbc26b2a7df86e106b6f6a7d286a69f7d1"
+      responses:
+        200:
+          description: "Successful response contains JWT access token and refresh token."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogInResponseDto'
+              example:
+                access: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJodHRwczovL3ZzdHVwLmZpY3RhZHZpc29yLmNvbS9hcGkvIiwidXNlcl9pZCI6ImUxNGNmZGZmLTM1ZTEtNGNlYi05NzgwLTkyMDYxNjEwMjU3MiIsImlzcyI6Imh0dHBzOi8vdnN0dXAuZmljdGFkdmlzb3IuY29tLyIsImV4cCI6MTY0NTM0OTY0NH0.rxLeRplrgsl8VfSNZHqQegBdvPSGSFFpGcQmKN9bN8c"
+                refresh: "t5hsSBhlpS6fVu92go4liGbthT3ta6frmexqLaT674g="
+        401:
+          description: "Authentication failed. Refesh token is not valid."

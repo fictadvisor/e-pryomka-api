@@ -14,6 +14,8 @@ jobs:
         run: |
           echo "::set-output name=IMAGE_NAME::${GITHUB_REPOSITORY#*/}"
           echo "::set-output name=DOCKERHUB_IMAGE_NAME::docker.pkg.github.com/${GITHUB_REPOSITORY}/${GITHUB_REPOSITORY#*/}"
+          echo "::set-output name=SWAGGER_IMAGE_NAME::${GITHUB_REPOSITORY#*/}-swagger"
+          echo "::set-output name=SWAGGER_DOCKERHUB_IMAGE_NAME::docker.pkg.github.com/${GITHUB_REPOSITORY}/${GITHUB_REPOSITORY#*/}-swagger"
 
       # Build the application
       - uses: actions/checkout@v2
@@ -31,7 +33,12 @@ jobs:
       - name: Docker image build
         run: |
           docker build -f Dockerfile-cloud -t "${{ steps.env.outputs.DOCKERHUB_IMAGE_NAME }}:latest" -t "${{ steps.env.outputs.DOCKERHUB_IMAGE_NAME }}:${GITHUB_SHA::8}" .
-      
+
+      - name: Swagger Docker image build
+        run: |
+          cd openapi
+          docker build -f Dockerfile-swagger -t "${{ steps.env.outputs.SWAGGER_DOCKERHUB_IMAGE_NAME }}:latest" -t "${{ steps.env.outputs.SWAGGER_DOCKERHUB_IMAGE_NAME }}:${GITHUB_SHA::8}" .
+
       # Login to the package repository
       - name: Package repository login
         run: docker login docker.pkg.github.com -u $GITHUB_ACTOR -p ${{secrets.GITHUB_TOKEN}}
@@ -41,6 +48,11 @@ jobs:
         env:
           IMAGE_NAME: $GITHUB_REPOSITORY
         run: docker push "docker.pkg.github.com/$GITHUB_REPOSITORY/${{ steps.env.outputs.IMAGE_NAME }}"
+
+      - name: Swagger Docker image publish
+        env:
+          IMAGE_NAME: $GITHUB_REPOSITORY
+        run: docker push "docker.pkg.github.com/$GITHUB_REPOSITORY/${{ steps.env.outputs.SWAGGER_IMAGE_NAME }}"
 
       # Deploy the application on the virtual machine
       - name: Deploy
@@ -53,3 +65,4 @@ jobs:
           script: |
             cd ~/deployment/production
             ./${{ steps.env.outputs.IMAGE_NAME }}.sh
+            ./${{ steps.env.outputs.SWAGGER_IMAGE_NAME }}.sh

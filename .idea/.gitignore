@@ -15,3 +15,4 @@ gradle.xml
 jarRepositories.xml
 misc.xml
 uiDesigner.xml
+jsLibraryMappings.xml

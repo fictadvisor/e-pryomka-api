@@ -11,4 +11,4 @@ app.use((req, res) => {
     res.header("Access-Control-Allow-Origin", "*")
 })
 
-app.listen(3004, () => console.log('Swagger runs on port 3000'))
+app.listen(3004, () => console.log('Swagger runs on port 3004'))

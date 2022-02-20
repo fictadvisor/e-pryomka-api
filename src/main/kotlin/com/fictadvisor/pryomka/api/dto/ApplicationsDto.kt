@@ -17,8 +17,13 @@ data class ApplicationResponseDto(
     @SerialName("created_at")
     val createdAt: Instant,
     val status: Application.Status,
-    @SerialName("status_msg")
-    val statusMsg: String? = null,
+    @SerialName("status_message")
+    val statusMessage: String? = null,
+)
+
+@Serializable
+data class ApplicationListDto(
+    val applications: List<ApplicationResponseDto>
 )
 
 @Serializable

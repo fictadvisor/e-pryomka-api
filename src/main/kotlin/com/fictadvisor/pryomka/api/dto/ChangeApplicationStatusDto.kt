@@ -7,6 +7,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ChangeApplicationStatusDto(
     val status: Application.Status,
-    @SerialName("status_msg")
-    val statusMsg: String? = null,
+    @SerialName("status_message")
+    val statusMessage: String? = null,
 )

@@ -15,7 +15,7 @@ fun Application.toDto() = ApplicationResponseDto(
     funding = funding,
     createdAt = createdAt,
     learningFormat = learningFormat,
-    statusMsg = statusMsg,
+    statusMessage = statusMsg,
 )
 
 fun ApplicationRequestDto.toDomain(userId: UserIdentifier) = Application(

@@ -30,7 +30,7 @@ fun Route.generalApplicationsRouters() {
                 ApplicationIdentifier(id),
                 userId,
                 changeStatusDto.status,
-                changeStatusDto.statusMsg,
+                changeStatusDto.statusMessage,
             )
 
             call.respond(HttpStatusCode.OK)

@@ -1,6 +1,7 @@
 package com.fictadvisor.pryomka.api.routes
 
 import com.fictadvisor.pryomka.Provider
+import com.fictadvisor.pryomka.api.dto.ApplicationListDto
 import com.fictadvisor.pryomka.api.mappers.toDto
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
@@ -15,7 +16,7 @@ import io.ktor.routing.*
 fun Route.operatorApplicationsRouters() {
     get("/applications") {
         val applications = Provider.applicationUseCase.getAll()
-        call.respond(applications.map(Application::toDto))
+        call.respond(ApplicationListDto(applications.map(Application::toDto)))
     }
 
     get("/applications/{id}") {

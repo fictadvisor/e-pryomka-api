@@ -46,11 +46,10 @@ jobs:
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.PRODUCTION_DO_HOST }}
-          username: ${{ secrets.PRODUCTION_DO_USERNAME }}
-          password: ${{ secrets.PRODUCTION_DO_PASSWORD }}
-          port: ${{ secrets.PRODUCTION_DO_PORT }}
+          host: ${{ secrets.BAR_DO_HOST }}
+          username: ${{ secrets.BAR_DO_USERNAME }}
+          password: ${{ secrets.BAR_DO_PASSWORD }}
+          port: ${{ secrets.BAR_DO_PORT }}
           script: |
             cd ~/deployment/production
             ./${{ steps.env.outputs.IMAGE_NAME }}.sh
-

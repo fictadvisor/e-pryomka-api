@@ -32,7 +32,7 @@ fun Application.configureRouting() {
         authRouters()
 
         get("/") {
-            call.respondText("Welcome to FICT!")
+            call.respondText("\uD83E\uDDD1\u200D\uD83D\uDCBBWelcome to FICT!\uD83D\uDE80")
         }
 
         post<CreateOperatorDto>("/register_admin") { (login, password) ->

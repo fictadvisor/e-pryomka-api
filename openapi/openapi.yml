@@ -588,7 +588,7 @@ paths:
                 FileType:
                   $ref: "#/components/schemas/DocumentType"
                 File:
-                  type: object
+                  type: string
                   format: binary
       responses:
         200:

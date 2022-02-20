@@ -306,16 +306,25 @@ components:
             createdAt: "2022-02-20T14:35:22.558884Z"
             status: "Rejected"
             statusMessage: "Rejected because of invalid documents"
+
     emptyApplicationListResponseExample:
       value:
         applications: []
+
     approveApplicationExample:
       value:
         status: "Approved"
+
     rejectApplicationExample:
       value:
         status: "Rejected"
         status_message: "Rejected because of invalid documents"
+
+    createApplicationExample:
+      value:
+        speciality: "SPEC_121"
+        funding: "Budget"
+        learning_format: "FullTime"
 
 security:
   - bearerAuth: []
@@ -452,30 +461,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationListDto'
               examples:
-                applicationListResponseExample:
+                "List of applications":
                   $ref: '#/components/examples/applicationListResponseExample'
-                emptyApplicationListResponseExample:
+                "No applications":
                   $ref: '#/components/examples/emptyApplicationListResponseExample'
 
   /applications/my:
     get:
       tags: [Applications]
-      summary: "Get application info"
-      description: "This endpoint can be used only by entrant. Returns detailed info about application"
+      summary: "Get all applications of current user"
+      description: "This endpoint can be used only by entrant."
       responses:
         200:
-          description: "Detailed application info"
+          description: "List of applications"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationResponseDto'
+                $ref: '#/components/schemas/ApplicationListDto'
               examples:
-                "New Application":
-                  $ref: '#/components/examples/newApplicationResponseExample'
-                "Filled Application":
-                  $ref: '#/components/examples/filledApplicationResponseExample'
-                "Rejected Application":
-                  $ref: '#/components/examples/rejectedApplicationResponseExample'
+                "List of applications":
+                  $ref: '#/components/examples/applicationListResponseExample'
+                "No applications":
+                  $ref: '#/components/examples/emptyApplicationListResponseExample'
         400:
           description: "Invalid application id"
           content:
@@ -485,6 +492,37 @@ paths:
           description: "Authorization failed"
         404:
           description: "Application not found"
+
+    post:
+      tags: [Applications]
+      summary: "Create application"
+      description: "This endpoint can be used only by entrant."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationRequestDto"
+            examples:
+              "Create application":
+                $ref: "#/components/examples/createApplicationExample"
+      responses:
+        200:
+          description: "Application created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationResponseDto"
+              examples:
+                "New Application":
+                  $ref: '#/components/examples/newApplicationResponseExample'
+        401:
+          description: "Authentication failed"
+        409:
+          description: "Application already exists"
+          content:
+            text/plain:
+              example: "Application already exists"
 
   /applications/{id}:
     get:

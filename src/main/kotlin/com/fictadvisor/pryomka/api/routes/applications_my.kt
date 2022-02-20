@@ -1,6 +1,7 @@
 package com.fictadvisor.pryomka.api.routes
 
 import com.fictadvisor.pryomka.Provider
+import com.fictadvisor.pryomka.api.dto.ApplicationListDto
 import com.fictadvisor.pryomka.api.dto.ApplicationRequestDto
 import com.fictadvisor.pryomka.api.mappers.toDomain
 import com.fictadvisor.pryomka.api.mappers.toDto
@@ -27,7 +28,7 @@ fun Route.myApplicationsRouters() {
         }
 
         val applications = Provider.applicationUseCase.getByUserId(userId)
-        call.respond(applications.map(Application::toDto))
+        call.respond(ApplicationListDto(applications.map(Application::toDto)))
     }
 
     post<ApplicationRequestDto>("/applications/my") { applicationRequest ->

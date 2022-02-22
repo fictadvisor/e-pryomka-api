@@ -3,9 +3,12 @@ package com.fictadvisor.pryomka.api.routes
 import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.dto.ApplicationListDto
 import com.fictadvisor.pryomka.api.mappers.toDto
+import com.fictadvisor.pryomka.domain.interactors.ApplicationUseCase
+import com.fictadvisor.pryomka.domain.interactors.GetDocumentsUseCase
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.ApplicationIdentifier
 import com.fictadvisor.pryomka.domain.models.DocumentType
+import com.fictadvisor.pryomka.domain.models.toApplicationIdentifierOrNull
 import com.fictadvisor.pryomka.utils.toUUIDOrNull
 import io.ktor.application.*
 import io.ktor.http.*
@@ -13,9 +16,12 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 
-fun Route.operatorApplicationsRouters() {
+fun Route.operatorApplicationsRouters(
+    applicationUseCase: ApplicationUseCase = Provider.applicationUseCase,
+    getDocumentsUseCase: GetDocumentsUseCase = Provider.getDocumentsUseCase,
+) {
     get("/applications") {
-        val applications = Provider.applicationUseCase.getAll()
+        val applications = applicationUseCase.getAll()
         call.respond(ApplicationListDto(applications.map(Application::toDto)))
     }
 
@@ -25,7 +31,7 @@ fun Route.operatorApplicationsRouters() {
             return@get
         }
 
-        val application = Provider.applicationUseCase.getById(ApplicationIdentifier(id)) ?: run {
+        val application = applicationUseCase.getById(ApplicationIdentifier(id)) ?: run {
             call.respond(HttpStatusCode.NotFound)
             return@get
         }
@@ -35,10 +41,12 @@ fun Route.operatorApplicationsRouters() {
 
     // todo think about sending all documents if type is not provided
     get("/applications/{id}/documents") {
-        val id = call.parameters["id"]?.toUUIDOrNull() ?: run {
-            call.respond(HttpStatusCode.BadRequest, "Invalid application id")
-            return@get
-        }
+        val id = call.parameters["id"]
+            ?.toApplicationIdentifierOrNull()
+            ?: run {
+                call.respond(HttpStatusCode.BadRequest, "Invalid application id")
+                return@get
+            }
 
         val type = call.request.queryParameters["type"]?.let {
             DocumentType.fromString(it)
@@ -47,7 +55,7 @@ fun Route.operatorApplicationsRouters() {
             return@get
         }
 
-        val (metadata, content) = Provider.getDocumentsUseCase.get(ApplicationIdentifier(id), type) ?: run {
+        val (metadata, content) = getDocumentsUseCase.get(id, type) ?: run {
             call.respond(HttpStatusCode.NotFound)
             return@get
         }

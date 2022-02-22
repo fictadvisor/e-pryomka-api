@@ -6,6 +6,7 @@ import com.fictadvisor.pryomka.api.dto.ApplicationRequestDto
 import com.fictadvisor.pryomka.api.mappers.toDomain
 import com.fictadvisor.pryomka.api.mappers.toDto
 import com.fictadvisor.pryomka.domain.interactors.ApplicationUseCase
+import com.fictadvisor.pryomka.domain.interactors.SubmitDocumentUseCase
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.utils.pathFor
@@ -20,14 +21,17 @@ import io.ktor.routing.*
 import kotlinx.coroutines.async
 import java.io.InputStream
 
-fun Route.myApplicationsRouters() {
+fun Route.myApplicationsRouters(
+    applicationUseCase: ApplicationUseCase = Provider.applicationUseCase,
+    submitDocumentUseCase: SubmitDocumentUseCase = Provider.submitDocumentUseCase,
+) {
     get("/applications/my") {
         val userId = call.userId ?: run {
             call.respond(HttpStatusCode.Unauthorized)
             return@get
         }
 
-        val applications = Provider.applicationUseCase.getByUserId(userId)
+        val applications = applicationUseCase.getByUserId(userId)
         call.respond(ApplicationListDto(applications.map(Application::toDto)))
     }
 
@@ -38,7 +42,6 @@ fun Route.myApplicationsRouters() {
         }
 
         val application = applicationRequest.toDomain(userId)
-        val applicationUseCase = Provider.applicationUseCase
 
         try {
             applicationUseCase.create(application, userId)
@@ -49,10 +52,12 @@ fun Route.myApplicationsRouters() {
     }
 
     post("/applications/{id}/documents") {
-        val id = call.parameters["id"]?.toUUIDOrNull() ?: run {
-            call.respond(HttpStatusCode.BadRequest, "Invalid application id")
-            return@post
-        }
+        val id = call.parameters["id"]
+            ?.toApplicationIdentifierOrNull()
+            ?: run {
+                call.respond(HttpStatusCode.BadRequest, "Invalid application id")
+                return@post
+            }
 
         val userId = call.userId ?: run {
             call.respond(HttpStatusCode.Unauthorized)
@@ -63,9 +68,7 @@ fun Route.myApplicationsRouters() {
         var stream: InputStream? = null
         var fileName: String? = null
 
-        val applicationDef = async {
-            Provider.applicationUseCase.get(ApplicationIdentifier(id), userId)
-        }
+        val applicationDef = async { applicationUseCase.get(id, userId) }
 
         try {
             call.receiveMultipart().forEachPart { part -> when (part) {
@@ -108,7 +111,7 @@ fun Route.myApplicationsRouters() {
             return@post
         }
 
-        Provider.submitDocumentUseCase(document, content)
+        submitDocumentUseCase(document, content)
         call.respond(HttpStatusCode.OK)
     }
 }

@@ -7,6 +7,7 @@ plugins {
     application
     kotlin("jvm") version "1.6.10"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
+    jacoco
 }
 
 group = "com.fictadvisor.pryomka"
@@ -17,6 +18,35 @@ application {
 
 repositories {
     mavenCentral()
+}
+
+tasks.test {
+    extensions.configure(JacocoTaskExtension::class) {
+        setDestinationFile(file("$buildDir/jacoco/jacoco.exec"))
+    }
+
+    finalizedBy("jacocoTestReport")
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+tasks.jacocoTestReport {
+    reports {
+        html.isEnabled = false
+        xml.isEnabled = true
+        csv.isEnabled = false
+    }
+}
+
+val testCoverage by tasks.registering {
+    group = "verification"
+    description = "Runs the unit tests with coverage"
+
+    dependsOn(":test", ":jacocoTestReport")
+
+    tasks["jacocoTestReport"].mustRunAfter(tasks["test"])
 }
 
 dependencies {

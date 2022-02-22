@@ -1,11 +1,11 @@
 package com.fictadvisor.pryomka.domain.models
 
 class Unauthorized : IllegalStateException("Can't find user")
-class NotFound(msg: String) : IllegalStateException(msg)
-class PermissionDenied(msg: String) : IllegalStateException(msg)
-class Duplicated(msg: String) : IllegalStateException(msg)
+class NotFound(message: String) : IllegalStateException(message)
+class PermissionDenied(message: String) : IllegalStateException(message)
+class Duplicated(message: String) : IllegalStateException(message)
 
 fun unauthorized(): Nothing = throw Unauthorized()
-fun notfound(msg: String): Nothing = throw NotFound(msg)
-fun permissionDenied(msg: String): Nothing = throw PermissionDenied(msg)
-fun duplicate(msg: String): Nothing = throw Duplicated(msg)
+fun notfound(message: String): Nothing = throw NotFound(message)
+fun permissionDenied(message: String): Nothing = throw PermissionDenied(message)
+fun duplicate(message: String): Nothing = throw Duplicated(message)

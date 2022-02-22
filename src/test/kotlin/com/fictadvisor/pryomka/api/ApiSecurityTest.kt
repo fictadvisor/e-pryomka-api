@@ -17,8 +17,6 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
-import org.mockito.Mockito
-import java.util.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,6 +37,7 @@ class ApiSecurityTest {
         realm = "vstup",
         tgBotId = "4002278938:ABGEHE_2_9razcj9t1zAw1JaYA31zz16bQp",
     )
+    private val telegramData = telegramData(tgBotId = config.tgBotId)
     private val authUseCase: AuthUseCase = AuthUseCaseImpl(userDataSource, tokenDataSource, config)
 
     private fun withProtectedTestApp(
@@ -71,6 +70,7 @@ class ApiSecurityTest {
     @BeforeTest
     fun init(): Unit = runBlocking {
         whenever(userDataSource.findEntrant(entrant.id)).thenReturn(entrant)
+        whenever(userDataSource.findEntrantByTelegramId(telegramData.id)).thenReturn(entrant)
         whenever(userDataSource.findEntrant(operator.id)).thenReturn(null)
         whenever(userDataSource.findEntrant(admin.id)).thenReturn(null)
         whenever(userDataSource.findStaff(entrant.id)).thenReturn(null)
@@ -91,28 +91,25 @@ class ApiSecurityTest {
         }
     }
 
-//    @Test
-//    fun `test general routes are accessible for entrants`() = runBlocking {
-//        // GIVEN
-//        whenever(authUseCase.findUser(entrant.id)).thenReturn(entrant)
-//
-//        // WHEN
-//        withProtectedTestApp {
-//            val call = handleRequest(HttpMethod.Get, "/") {
-//                addHeader(
-//                    HttpHeaders.Authorization,
-//                    "Basic " + Base64.getEncoder().encodeToString("Lulu:Britannia".toByteArray())
-//                )
-//            }
-//
-//            // THEN
-//            with(call) {
-//                assertEquals(HttpStatusCode.OK, response.status())
-//            }
-//        }
-//
-//        return@runBlocking
-//    }
+    @Test
+    fun `test general routes are accessible for entrants`() = runBlocking {
+        // GIVEN
+        val (accessToken, _) = authUseCase.exchange(telegramData)
+
+        // WHEN
+        withProtectedTestApp {
+            val call = handleRequest(HttpMethod.Get, "/") {
+                addHeader(HttpHeaders.Authorization, "Bearer $accessToken")
+            }
+
+            // THEN
+            with(call) {
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+        }
+
+        return@runBlocking
+    }
 
     @Test
     fun `test general routes are accessible for operators`() = runBlocking {
@@ -169,56 +166,29 @@ class ApiSecurityTest {
         return@runBlocking
     }
 
-//    @Test
-//    fun `test basic routes are accessible for entrants`() = runBlocking {
-//        // GIVEN
-//        Mockito.`when`(findUserUseCase.findByName(any())).thenReturn(entrant)
-//
-//        // WHEN
-//        withProtectedTestApp {
-//            val call = handleRequest(HttpMethod.Get, "/general") {
-//                addHeader(
-//                    HttpHeaders.Authorization,
-//                    "Basic " + Base64.getEncoder().encodeToString("Lulu:Britannia".toByteArray())
-//                )
-//            }
-//
-//            // THEN
-//            with(call) {
-//                assertEquals(HttpStatusCode.OK, response.status())
-//            }
-//        }
-//
-//        return@runBlocking
-//    }
-//
-//    @Test
-//    fun `test basic routes create user if not found`() = runBlocking {
-//        // GIVEN
-//        Mockito.`when`(findUserUseCase.findByName(any())).thenReturn(null)
-//        Mockito.`when`(createUserUseCase.invoke(any())).thenReturn(entrant)
-//
-//        // WHEN
-//        withProtectedTestApp {
-//            val call = handleRequest(HttpMethod.Get, "/general") {
-//                addHeader(
-//                    HttpHeaders.Authorization,
-//                    "Basic " + Base64.getEncoder().encodeToString("Lulu:Britannia".toByteArray())
-//                )
-//            }
-//
-//            // THEN
-//            with(call) {
-//                assertEquals(HttpStatusCode.OK, response.status())
-//                runBlocking {
-//                    Mockito.verify(createUserUseCase, times(1)).invoke(any())
-//                }
-//            }
-//        }
-//
-//        return@runBlocking
-//    }
-//
+    @Test
+    fun `test basic routes are accessible for entrants`() = runBlocking {
+        // GIVEN
+        val (accessToken, _) = authUseCase.exchange(telegramData)
+
+        // WHEN
+        withProtectedTestApp {
+            val call = handleRequest(HttpMethod.Get, "/general") {
+                addHeader(
+                    HttpHeaders.Authorization,
+                    "Bearer $accessToken"
+                )
+            }
+
+            // THEN
+            with(call) {
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+        }
+
+        return@runBlocking
+    }
+
     @Test
     fun `test basic routes are accessible for operators`() = runBlocking {
         // GIVEN
@@ -259,55 +229,29 @@ class ApiSecurityTest {
         return@runBlocking
     }
 
-//    @Test
-//    fun `test entrant routes are accessible for entrants`() = runBlocking {
-//        // GIVEN
-//        Mockito.`when`(findUserUseCase.findByName(any())).thenReturn(entrant)
-//
-//        // WHEN
-//        withProtectedTestApp {
-//            val call = handleRequest(HttpMethod.Get, "/entrant") {
-//                addHeader(
-//                    HttpHeaders.Authorization,
-//                    "Basic " + Base64.getEncoder().encodeToString("Lulu:Britannia".toByteArray())
-//                )
-//            }
-//
-//            // THEN
-//            with(call) {
-//                assertEquals(HttpStatusCode.OK, response.status())
-//            }
-//        }
-//
-//        return@runBlocking
-//    }
-//
-//    @Test
-//    fun `test entrant routes create user if not found`() = runBlocking {
-//        // GIVEN
-//        Mockito.`when`(findUserUseCase.findByName(any())).thenReturn(null)
-//        Mockito.`when`(createUserUseCase.invoke(any())).thenReturn(entrant)
-//
-//        // WHEN
-//        withProtectedTestApp {
-//            val call = handleRequest(HttpMethod.Get, "/entrant") {
-//                addHeader(
-//                    HttpHeaders.Authorization,
-//                    "Basic " + Base64.getEncoder().encodeToString("Lulu:Britannia".toByteArray())
-//                )
-//            }
-//
-//            // THEN
-//            with(call) {
-//                assertEquals(HttpStatusCode.OK, response.status())
-//                runBlocking {
-//                    Mockito.verify(createUserUseCase, times(1)).invoke(any())
-//                }
-//            }
-//        }
-//
-//        return@runBlocking
-//    }
+    @Test
+    fun `test entrant routes are accessible for entrants`() = runBlocking {
+        // GIVEN
+        val (accessToken, _) = authUseCase.exchange(telegramData)
+
+
+        // WHEN
+        withProtectedTestApp {
+            val call = handleRequest(HttpMethod.Get, "/entrant") {
+                addHeader(
+                    HttpHeaders.Authorization,
+                    "Bearer $accessToken"
+                )
+            }
+
+            // THEN
+            with(call) {
+                assertEquals(HttpStatusCode.OK, response.status())
+            }
+        }
+
+        return@runBlocking
+    }
 
     @Test
     fun `test entrant routes are not accessible for operators`() = runBlocking {
@@ -348,30 +292,30 @@ class ApiSecurityTest {
 
         return@runBlocking
     }
-//
-//    @Test
-//    fun `test operator routes are not accessible for entrants`() = runBlocking {
-//        // GIVEN
-//        Mockito.`when`(findUserUseCase.findByName(any())).thenReturn(operator)
-//
-//        // WHEN
-//        withProtectedTestApp {
-//            val call = handleRequest(HttpMethod.Get, "/entrant") {
-//                addHeader(
-//                    HttpHeaders.Authorization,
-//                    "Basic " + Base64.getEncoder().encodeToString("Lulu:Britannia".toByteArray())
-//                )
-//            }
-//
-//            // THEN
-//            with(call) {
-//                assertEquals(HttpStatusCode.Unauthorized, response.status())
-//            }
-//        }
-//
-//        return@runBlocking
-//    }
-//
+
+    @Test
+    fun `test operator routes are not accessible for entrants`() = runBlocking {
+        // GIVEN
+        val (accessToken, _) = authUseCase.exchange(telegramData)
+
+        // WHEN
+        withProtectedTestApp {
+            val call = handleRequest(HttpMethod.Get, "/operator") {
+                addHeader(
+                    HttpHeaders.Authorization,
+                    "Bearer $accessToken"
+                )
+            }
+
+            // THEN
+            with(call) {
+                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            }
+        }
+
+        return@runBlocking
+    }
+
     @Test
     fun `test operator routes are accessible for operators`() = runBlocking {
         // GIVEN
@@ -412,28 +356,28 @@ class ApiSecurityTest {
         return@runBlocking
     }
 
-//    @Test
-//    fun `test admin routes are not accessible for entrants`() = runBlocking {
-//        // GIVEN
-//        Mockito.`when`(findUserUseCase.findByName(any())).thenReturn(entrant)
-//
-//        // WHEN
-//        withProtectedTestApp {
-//            val call = handleRequest(HttpMethod.Get, "/admin") {
-//                addHeader(
-//                    HttpHeaders.Authorization,
-//                    "Basic " + Base64.getEncoder().encodeToString("Lulu:Britannia".toByteArray())
-//                )
-//            }
-//
-//            // THEN
-//            with(call) {
-//                assertEquals(HttpStatusCode.Unauthorized, response.status())
-//            }
-//        }
-//
-//        return@runBlocking
-//    }
+    @Test
+    fun `test admin routes are not accessible for entrants`() = runBlocking {
+        // GIVEN
+        val (accessToken, _) = authUseCase.exchange(telegramData)
+
+        // WHEN
+        withProtectedTestApp {
+            val call = handleRequest(HttpMethod.Get, "/admin") {
+                addHeader(
+                    HttpHeaders.Authorization,
+                    "Bearer $accessToken"
+                )
+            }
+
+            // THEN
+            with(call) {
+                assertEquals(HttpStatusCode.Unauthorized, response.status())
+            }
+        }
+
+        return@runBlocking
+    }
 
     @Test
     fun `test admin routes are not accessible for operators`() = runBlocking {

@@ -52,10 +52,12 @@ fun Route.myApplicationsRouters(
     }
 
     post("/applications/{id}/documents") {
-        val id = call.parameters["id"]?.toUUIDOrNull() ?: run {
-            call.respond(HttpStatusCode.BadRequest, "Invalid application id")
-            return@post
-        }
+        val id = call.parameters["id"]
+            ?.toApplicationIdentifierOrNull()
+            ?: run {
+                call.respond(HttpStatusCode.BadRequest, "Invalid application id")
+                return@post
+            }
 
         val userId = call.userId ?: run {
             call.respond(HttpStatusCode.Unauthorized)
@@ -66,9 +68,7 @@ fun Route.myApplicationsRouters(
         var stream: InputStream? = null
         var fileName: String? = null
 
-        val applicationDef = async {
-            applicationUseCase.get(ApplicationIdentifier(id), userId)
-        }
+        val applicationDef = async { applicationUseCase.get(id, userId) }
 
         try {
             call.receiveMultipart().forEachPart { part -> when (part) {

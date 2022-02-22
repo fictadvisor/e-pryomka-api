@@ -1,11 +1,8 @@
 package com.fictadvisor.pryomka.api.mappers
 
 import com.fictadvisor.pryomka.api.dto.*
-import com.fictadvisor.pryomka.domain.models.Application
-import com.fictadvisor.pryomka.domain.models.UserIdentifier
-import com.fictadvisor.pryomka.domain.models.generateApplicationId
+import com.fictadvisor.pryomka.domain.models.*
 import kotlinx.datetime.Clock
-import com.fictadvisor.pryomka.domain.models.User
 
 fun Application.toDto() = ApplicationResponseDto(
     id = id.value.toString(),
@@ -50,3 +47,13 @@ fun User.toWhoAmIDto() = when (this) {
         role = role,
     )
 }
+
+fun TelegramDataDto.toTelegramData() = TelegramData(
+    authDate,
+    firstName,
+    id,
+    lastName,
+    photoUrl,
+    userName,
+    hash,
+)

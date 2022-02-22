@@ -297,4 +297,47 @@ class AuthUseCaseImplTest {
         // THEN
         assertNull(me)
     }
+
+    @Test
+    fun `should register entrant and exchange tokens if not found`(): Unit = runBlocking {
+        // GIVEN
+        val data = telegramData(tgBotId = config.tgBotId)
+        whenever(userDataSource.findEntrantByTelegramId(any())).thenReturn(null)
+
+        // WHEN
+        val (access, refresh) = useCase.exchange(data)
+
+        // THEN
+        assertTrue(access.isNotBlank(), "access token must be generated")
+        assertTrue(refresh.isNotBlank(), "refresh token must be generated")
+        verify(userDataSource).registerEntrant(any())
+    }
+
+
+    @Test
+    fun `should update entrant and exchange tokens if entrant exists`(): Unit = runBlocking {
+        // GIVEN
+        val data = telegramData(tgBotId = config.tgBotId)
+        whenever(userDataSource.findEntrantByTelegramId(any())).thenReturn(entrant())
+
+        // WHEN
+        val (access, refresh) = useCase.exchange(data)
+
+        // THEN
+        assertTrue(access.isNotBlank(), "access token must be generated")
+        assertTrue(refresh.isNotBlank(), "refresh token must be generated")
+        verify(userDataSource).updateEntrant(any())
+    }
+
+
+    @Test
+    fun `should not exchange tokens if verification failed`(): Unit = runBlocking {
+        // GIVEN
+        val data = telegramData(tgBotId = config.tgBotId).copy(
+            hash = "12345678bc23181fcfecf20c82d7a119316fad7c24e076d163169c8b2e211673"
+        )
+
+        // WHEN+THEN
+        assertThrows<IllegalArgumentException> { useCase.exchange(data) }
+    }
 }

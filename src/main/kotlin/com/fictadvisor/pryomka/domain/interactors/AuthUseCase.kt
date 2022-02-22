@@ -3,17 +3,12 @@ package com.fictadvisor.pryomka.domain.interactors
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.fictadvisor.pryomka.Environment
+import com.fictadvisor.pryomka.data.encryption.Hash
 import com.fictadvisor.pryomka.domain.datasource.TokenDataSource
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
-import com.fictadvisor.pryomka.domain.models.TokenMetadata
-import com.fictadvisor.pryomka.domain.models.User
-import com.fictadvisor.pryomka.domain.models.UserIdentifier
-import com.fictadvisor.pryomka.domain.models.generateUserId
-import org.apache.commons.codec.binary.Hex
-import java.security.MessageDigest
+import com.fictadvisor.pryomka.domain.mappers.toEntrant
+import com.fictadvisor.pryomka.domain.models.*
 import java.util.*
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 import kotlin.text.toByteArray
 
 interface AuthUseCase {
@@ -37,7 +32,7 @@ interface AuthUseCase {
      * entrants.
      *
      * @return [Pair] where [Pair.first] is an access token and [Pair.second] is a refresh token */
-    suspend fun exchange(telegramData: Map<String, String>): Pair<String, String>
+    suspend fun exchange(telegramData: TelegramData): Pair<String, String>
 
     data class Config(
         val accessTTL: Long,
@@ -105,10 +100,10 @@ class AuthUseCaseImpl(
         return findUser(userId)
     }
 
-    override suspend fun exchange(telegramData: Map<String, String>): Pair<String, String> {
-        require(verifyTelegramData(telegramData))
+    override suspend fun exchange(telegramData: TelegramData): Pair<String, String> {
+        require(Hash.verifyTelegramData(telegramData, config.tgBotId))
 
-        var entrant = formEntrant(telegramData)
+        var entrant = telegramData.toEntrant()
         val existing = userDataSource.findEntrantByTelegramId(entrant.telegramId)
 
         if (existing != null) {
@@ -163,37 +158,4 @@ class AuthUseCaseImpl(
 
         return Base64.getEncoder().encodeToString(signed) to validUntil
     }
-
-    private fun verifyTelegramData(data: Map<String, String>): Boolean {
-        val hash = data["hash"] ?: error("No hash")
-
-        val dataCheckString = data
-            .filterKeys { it != "hash" }
-            .keys
-            .sorted()
-            .joinToString("\n") { key -> "$key=${data[key]}" }
-            .toByteArray()
-
-        val hmac = Mac.getInstance("HmacSHA256")
-
-        val sha256 = MessageDigest.getInstance("SHA-256")
-        val secretKey = SecretKeySpec(
-            sha256.digest(config.tgBotId.toByteArray()),
-            "HmacSHA256"
-        )
-
-        hmac.init(secretKey)
-        val hashed = Hex.encodeHexString(hmac.doFinal(dataCheckString))
-
-        return hash == hashed
-    }
-
-    private fun formEntrant(data: Map<String, String>) = User.Entrant(
-        id = generateUserId(),
-        telegramId = data["id"]?.toLong() ?: error("No telegram id"),
-        firstName = data["first_name"] ?: error("No first name"),
-        lastName = data["last_name"],
-        userName = data["user_name"],
-        photoUrl = data["photo_url"],
-    )
 }

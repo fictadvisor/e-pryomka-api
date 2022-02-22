@@ -1,9 +1,12 @@
 package com.fictadvisor.pryomka
 
+import com.fictadvisor.pryomka.api.dto.TelegramDataDto
+import com.fictadvisor.pryomka.data.encryption.Hash
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
 import io.ktor.application.*
 import io.ktor.features.*
+import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.testing.*
@@ -35,9 +38,10 @@ internal inline fun <reified T> TestApplicationResponse.body() = Json.decodeFrom
     content ?: error("Body is empty")
 )
 
-internal inline fun <reified T> TestApplicationRequest.setJsonBody(body: T) = setBody(
-    Json.encodeToString(body)
-)
+internal inline fun <reified T> TestApplicationRequest.setJsonBody(body: T) {
+    addHeader(HttpHeaders.ContentType, "application/json")
+    setBody(Json.encodeToString(body))
+}
 
 fun entrant(
     id: UserIdentifier = generateUserId(),
@@ -79,3 +83,45 @@ fun application(
     status = status,
     statusMessage = statusMsg,
 )
+
+fun telegramData(
+    authDate: Long = 123456,
+    id: Long = 1234567890L,
+    firstName: String = "Lelouch",
+    lastName: String? = "Lamperouge",
+    userName: String? = "lelouch",
+    photoUrl: String? = "http://photos.com/lelouch",
+    tgBotId: String? = null,
+): TelegramData {
+    var data = TelegramData(authDate, firstName, id, lastName, userName, photoUrl, "")
+
+    tgBotId?.let {
+        val hash = Hash.hashTelegramData(data, it)
+        data = data.copy(hash = hash)
+    }
+
+    return data
+}
+
+fun telegramDataDto(
+    tgBotId: String,
+    authDate: Long = 123456,
+    id: Long = 1234567890L,
+    firstName: String = "Lelouch",
+    lastName: String? = "Lamperouge",
+    userName: String? = "lelouch",
+    photoUrl: String? = "http://photos.com/lelouch",
+): TelegramDataDto {
+    val data = TelegramData(authDate, firstName, id, lastName, userName, photoUrl, "")
+    val hash = Hash.hashTelegramData(data, tgBotId)
+
+    return TelegramDataDto(
+        data.authDate,
+        data.id,
+        data.firstName,
+        data.lastName,
+        data.userName,
+        data.photoUrl,
+        hash,
+    )
+}

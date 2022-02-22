@@ -1,6 +1,7 @@
 package com.fictadvisor.pryomka.api.dto
 
 import com.fictadvisor.pryomka.domain.models.User
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -26,4 +27,26 @@ data class WhoAmIDto(
     val name: String,
     val role: User.Staff.Role? = null,
     val photoUrl: String? = null,
+)
+
+@Serializable
+data class TelegramDataDto(
+    @SerialName("auth_date")
+    val authDate: Long,
+
+    val id: Long,
+
+    @SerialName("first_name")
+    val firstName: String,
+
+    @SerialName("last_name")
+    val lastName: String? = null,
+
+    @SerialName("username")
+    val userName: String? = null,
+
+    @SerialName("photo_url")
+    val photoUrl: String? = null,
+
+    val hash: String
 )

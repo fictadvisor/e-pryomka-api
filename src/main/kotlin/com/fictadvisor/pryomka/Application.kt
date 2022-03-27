@@ -12,7 +12,7 @@ import io.ktor.server.netty.*
 
 fun main() {
     embeddedServer(Netty, port = Environment.PORT, host = Environment.HOST) {
-//        initDB()
+        initDB()
         install(ContentNegotiation) { json() }
         install(DefaultHeaders)
         install(CORS) {

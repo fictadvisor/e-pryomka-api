@@ -330,6 +330,51 @@ security:
   - bearerAuth: []
 
 paths:
+  /rysni-pryzda:
+    get:
+      tags: [ Rusnia ]
+      summary: "Statistics of russian losses"
+      security: []
+      responses:
+        200:
+          description: "Successful response"
+          content:
+            application/json:
+              example:
+                losses:
+                  "2022-03-27":
+                    "Tanks": 582
+                    "ArmoredCarriers": 1664
+                    "Planes": 121
+                    "Helicopters": 127
+                    "ArtillerySystems": 294
+                    "AutomotiveTechnology": 1144
+                    "RocketSystems": 93
+                    "AirDefenceSystems": 52
+                    "UnmannedAircraft": 56
+                    "Tankers": 73
+                    "Ships": 7
+                    "SpecialEquipment": 21
+                    "Iskanders": 4
+                    "Personnel": 16600
+                    "Captives": 421
+                  "2022-03-26":
+                    "Tanks": 575
+                    "ArmoredCarriers": 1640
+                    "Planes": 117
+                    "Helicopters": 127
+                    "ArtillerySystems": 293
+                    "AutomotiveTechnology": 1131
+                    "RocketSystems": 91
+                    "AirDefenceSystems": 51
+                    "UnmannedAircraft": 53
+                    "Tankers": 73
+                    "Ships": 7
+                    "SpecialEquipment": 19
+                    "Iskanders": 2
+                    "Personnel": 16400
+                    "Captives": 412
+
   /:
     get:
       tags:

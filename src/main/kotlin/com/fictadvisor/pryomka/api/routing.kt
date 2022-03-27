@@ -1,5 +1,6 @@
 package com.fictadvisor.pryomka.api
 
+import api.routes.rusniaRoutes
 import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.dto.CreateOperatorDto
 import com.fictadvisor.pryomka.api.routes.*
@@ -43,5 +44,7 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.NotFound)
             }
         }
+
+        rusniaRoutes()
     }
 }

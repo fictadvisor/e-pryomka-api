@@ -1,55 +1,24 @@
+plugins {
+    kotlin("jvm")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    jacoco
+}
+
 val ktorVersion: String by project
 val kotlinVersion: String by project
 val logbackVersion: String by project
 val exposedVersion: String by project
 
-plugins {
-    application
-    kotlin("jvm") version "1.6.10"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
-    jacoco
-}
-
-group = "com.fictadvisor.pryomka"
+group = "com.fictadvisor.pryomka.rusnia"
 version = "0.0.1"
-application {
-    mainClass.set("com.fictadvisor.pryomka.ApplicationKt")
-}
 
 repositories {
     mavenCentral()
 }
 
-tasks.test {
-    extensions.configure(JacocoTaskExtension::class) {
-        setDestinationFile(file("$buildDir/jacoco/jacoco.exec"))
-    }
-
-    finalizedBy("jacocoTestReport")
-}
-
-jacoco {
-    toolVersion = "0.8.7"
-}
-
-tasks.jacocoTestReport {
-    reports {
-        html.isEnabled = false
-        xml.isEnabled = true
-        csv.isEnabled = false
-    }
-}
-
-val testCoverage by tasks.registering {
-    group = "verification"
-    description = "Runs the unit tests with coverage"
-
-    dependsOn(":test", ":jacocoTestReport")
-
-    tasks["jacocoTestReport"].mustRunAfter(tasks["test"])
-}
-
 dependencies {
+    implementation(kotlin("stdlib"))
+
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
@@ -75,5 +44,5 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 
-    implementation(project(":rusnia"))
+    implementation("it.skrape:skrapeit:1.1.5")
 }

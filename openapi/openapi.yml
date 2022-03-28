@@ -23,6 +23,13 @@ components:
       bearerFormat: JWT
 
   schemas:
+    Locale:
+      type: string
+      enum:
+        - uk
+        - ru
+        - en
+
     LogInRequestDto:
       type: "object"
       properties:
@@ -215,6 +222,12 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/DocumentType"
+    query_locale:
+      name: l
+      required: false
+      in: query
+      schema:
+        $ref: "#/components/schemas/Locale"
 
   examples:
     operatorResponseExample:
@@ -334,7 +347,10 @@ paths:
     get:
       tags: [ Rusnia ]
       summary: "Statistics of russian losses"
+      description: "Localization is passed via query parameter. By default returns names of enum entries that is suitable for following processing, caching etc."
       security: []
+      parameters:
+        - $ref: "#components/parameters/query_locale"
       responses:
         200:
           description: "Successful response"

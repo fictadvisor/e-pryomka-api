@@ -23,3 +23,6 @@ enum class LossesCategory {
 
 typealias DailyLosses = Map<LossesCategory, Long>
 typealias TotalLosses = Map<LocalDate, DailyLosses>
+
+typealias DailyLossesLocalized = Map<String, Long>
+typealias TotalLossesLocalized = Map<LocalDate, DailyLossesLocalized>

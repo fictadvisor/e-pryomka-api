@@ -1,7 +1,7 @@
 package api.dto
 
-import domain.model.TotalLosses
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LossesDto(val losses: TotalLosses)
+data class LossesDto(val losses: Map<LocalDate, Map<String, Long>>)

@@ -17,18 +17,36 @@ import java.util.*
 
 class LossesRemoteDataSource : LossesDataSource {
     private val dateRegex = Regex("\\d{1,2}\\.\\d{1,2}\\.\\d{4}")
+    private val baseUrl = "https://index.minfin.com.ua/ua/russian-invading/casualties/month.php"
+    private val warStarted = Calendar.getInstance().apply {
+        set(
+            /* year = */ 2022,
+            /* month = */ 1, // starts with 0
+            /* date = */ 24,
+        )
+    }
 
-    override suspend fun getLosses(): TotalLosses = parseLosses()
-        .mapValues { (_, dailyLosses) ->
-            parseDailyLosses(dailyLosses)
-        }
+    override suspend fun getLosses(): TotalLosses = parseLosses().mapValues { (_, dailyLosses) ->
+        parseDailyLosses(dailyLosses)
+    }
 
     private suspend fun parseLosses(): Map<LocalDate, List<String>> {
         println("Parsing losses from minfin.com.ua...")
+        val currentMonth = Calendar.getInstance()[Calendar.MONTH] + 1
+        val warStartedMonth = warStarted[Calendar.MONTH] + 1
+
+        val totalLosses = mutableMapOf<LocalDate, List<String>>()
+        for (month in warStartedMonth..currentMonth) {
+            totalLosses += parseMonthlyLosses(month)
+        }
+
+        return totalLosses.toSortedMap { date1, date2 -> date2.compareTo(date1) }
+    }
+
+    private suspend fun parseMonthlyLosses(month: Int): Map<LocalDate, List<String>> {
+        println("Parsing losses for ${formatMonth(month)}")
         val losses = skrape(AsyncFetcher) {
-            request {
-                url = "https://index.minfin.com.ua/ua/russian-invading/casualties/"
-            }
+            request { url = urlForMonth(month) }
 
             response {
                 document.li {
@@ -68,6 +86,9 @@ class LossesRemoteDataSource : LossesDataSource {
 
         return losses
     }
+
+    private fun urlForMonth(month: Int) = "$baseUrl?month=${formatMonth(month)}"
+    private fun formatMonth(month: Int) = "%d-%02d".format(warStarted[Calendar.YEAR], month)
 
     private fun parseDailyLosses(dailyLosses: List<String>): DailyLosses {
         val parsed = mutableMapOf<LossesCategory, Long>()

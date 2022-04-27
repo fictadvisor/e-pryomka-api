@@ -6,7 +6,9 @@ import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application.Status
 
+/** Encapsulates logic of changing status of applications. */
 interface ChangeApplicationStatusUseCase {
+    /** Updates status of given application by its application id and user id. */
     suspend fun changeStatus(
         applicationId: ApplicationIdentifier,
         userId: UserIdentifier,

@@ -1,10 +1,11 @@
 package com.fictadvisor.pryomka
 
-import ch.qos.logback.core.subst.Token
 import com.fictadvisor.pryomka.data.datasources.*
 import com.fictadvisor.pryomka.domain.datasource.*
 import com.fictadvisor.pryomka.domain.interactors.*
 
+/** Object that plays role of dependency locator.
+ * TODO: replace with some DI framework. */
 object Provider {
     val applicationUseCase: ApplicationUseCase by lazy {
         ApplicationUseCaseImpl(applicationDataSource)

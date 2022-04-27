@@ -1,5 +1,6 @@
 package com.fictadvisor.pryomka
 
+/** Object that stores environment variables needed by the application to work. */
 object Environment {
     private val env = System.getenv()
 

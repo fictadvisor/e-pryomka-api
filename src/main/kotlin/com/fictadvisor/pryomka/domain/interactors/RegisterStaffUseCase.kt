@@ -4,6 +4,8 @@ import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.models.User
 
 interface RegisterStaffUseCase {
+    /** Registers any staff users including system administrators using given credentials.
+     * @return information of the registered user */
     suspend fun register(
         login: String,
         password: String,

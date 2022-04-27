@@ -5,7 +5,9 @@ import com.fictadvisor.pryomka.domain.datasource.DocumentMetadataDataSource
 import com.fictadvisor.pryomka.domain.models.DocumentMetadata
 import java.io.InputStream
 
+/** Stores document in the system. */
 fun interface SubmitDocumentUseCase {
+    /** Stores document with a given metadata and a given content in the system. */
     suspend operator fun invoke(
         document: DocumentMetadata,
         content: InputStream,

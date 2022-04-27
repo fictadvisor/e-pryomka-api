@@ -20,10 +20,16 @@ interface AuthUseCase {
     /** @return [Pair] where [Pair.first] is an access token and [Pair.second] is a refresh token */
     suspend fun refresh(token: String): Pair<String, String>
 
+    /** Validates given access token.
+     * @return true if user can have access to the system, false otherwise. */
     suspend fun auth(token: String): Boolean
 
+    /** Searches user with given userId. Needed to find a user role while authorizing them.
+     * @return user or null. */
     suspend fun findUser(userId: UserIdentifier): User?
 
+    /** Validates given access token and returns information about a user it belongs to.
+     * @return user or null if token is not valid. */
     suspend fun getMe(token: String): User?
 
     /** Exchanges Telegram authentication token, obtained via bot to
@@ -34,6 +40,8 @@ interface AuthUseCase {
      * @return [Pair] where [Pair.first] is an access token and [Pair.second] is a refresh token */
     suspend fun exchange(telegramData: TelegramData): Pair<String, String>
 
+    /** System security configuration for JWT tokens.
+     * Can be replaced for testing. In real application, [Config.DEFAULT] should be used. */
     data class Config(
         val accessTTL: Long,
         val refreshTTL: Long,
@@ -44,6 +52,7 @@ interface AuthUseCase {
         val tgBotId: String,
     ) {
         companion object {
+            /** Default instance of [Config] that takes all parameters from the [Environment]. */
             val DEFAULT get() = Config(
                 accessTTL = Environment.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
                 refreshTTL = Environment.JWT_REFRESH_TOKEN_EXPIRATION_TIME,

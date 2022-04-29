@@ -13,14 +13,24 @@ class GetLossesUseCase(
     private val remote: LossesDataSource
 ) {
     private var cache: Cache? = null
-    private val Cache.isValid get() = (now - first).inWholeHours >= 12
+    private val Cache.isValid get() = (now - first).inWholeHours <= 12
     private val now get() = Clock.System.now()
 
     suspend operator fun invoke(locale: Locale?): TotalLossesLocalized {
-        cache?.let { if (it.isValid) return translate(locale, it.second) }
+        cache?.let {
+            if (it.isValid) {
+                println("Parsing losses from the cache")
+                return translate(locale, it.second)
+            }
+        }
+        println("Parsing losses from the network")
         val losses = remote.getLosses()
         cache = now to losses
         return translate(locale, losses)
+    }
+
+    fun invalidateCache() {
+        cache = null
     }
 
     private fun translate(locale: Locale?, losses: TotalLosses): TotalLossesLocalized {

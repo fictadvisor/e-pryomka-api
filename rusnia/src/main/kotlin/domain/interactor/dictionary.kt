@@ -8,7 +8,7 @@ internal val LossesCategory.ukrainian: String get() = when (this) {
     LossesCategory.Tanks                -> "Танки"
     LossesCategory.ArmoredCarriers      -> "ББМ"
     LossesCategory.ArtillerySystems     -> "Гармати"
-    LossesCategory.RocketSystems        -> "РСЗО"
+    LossesCategory.RocketSystems        -> "РСЗВ"
     LossesCategory.AirDefenceSystems    -> "ППО"
     LossesCategory.Planes               -> "Літаки"
     LossesCategory.Iskanders            -> "Пускові установки ОТРК"

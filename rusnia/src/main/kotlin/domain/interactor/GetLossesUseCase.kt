@@ -38,9 +38,6 @@ class GetLossesUseCase(
             Locale("uk").language -> losses.mapValues {
                 it.value.mapKeys { (category, _) -> category.ukrainian }
             }
-            Locale("ru").language -> losses.mapValues {
-                it.value.mapKeys { (category, _) -> category.russian }
-            }
             Locale("en").language -> losses.mapValues {
                 it.value.mapKeys { (category, _) -> category.english }
             }

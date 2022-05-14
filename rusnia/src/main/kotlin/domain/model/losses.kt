@@ -18,6 +18,7 @@ enum class LossesCategory {
     Tankers,                            // цистерни з ППМ
     UnmannedAircraft,                   // БПЛА
     SpecialEquipment,                   // спецтехніка
+    Rockets,                            // крилаті ракети
     Other,
 }
 

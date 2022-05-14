@@ -129,11 +129,12 @@ class LossesRemoteDataSource : LossesDataSource {
         LossesCategory.Planes -> string == "літаки"
         LossesCategory.Iskanders -> string == "пускові установки отрк"
         LossesCategory.Helicopters -> string == "гелікоптери"
-        LossesCategory.AutomotiveTechnology -> string == "автомобілі"
+        LossesCategory.AutomotiveTechnology -> string in listOf("автомобілі", "автомобілі та автоцистерни")
         LossesCategory.Ships -> string == "кораблі (катери)"
         LossesCategory.Tankers -> string == "цистерни з ппм"
         LossesCategory.UnmannedAircraft -> string == "бпла"
         LossesCategory.SpecialEquipment -> string == "спеціальна техніка"
+        LossesCategory.Rockets -> string == "крилаті ракети"
         LossesCategory.Captives, LossesCategory.Other -> false
     }
 
@@ -145,14 +146,16 @@ class LossesRemoteDataSource : LossesDataSource {
     /** @return [Pair] where [Pair.first] is amount of dead soldiers
      * and [Pair.second] is amount of captives */
     private fun parseAmountSoldiers(string: String): Pair<Long?, Long?> {
-        val regex = Regex("\\d+")
-        val numbers = regex.findAll(string)
-            .map { it.value.toLongOrNull() }
-            .toList()
+        val words = string.lowercase().split(' ')
 
-        val personnel = numbers.getOrNull(0)
-        val captives = numbers.getOrNull(1)
+        val personnel = words.firstOrNull { it.toLongOrNull() != null }
 
-        return personnel to captives
+        val captives = words.filter {
+            it != personnel && !it.matches(Regex("\\(\\+.+\\)"))
+        }.find {
+            it.toLongOrNull() != null
+        }
+
+        return personnel?.toLongOrNull() to captives?.toLongOrNull()
     }
 }

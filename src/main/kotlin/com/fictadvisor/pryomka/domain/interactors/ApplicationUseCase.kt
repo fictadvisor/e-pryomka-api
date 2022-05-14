@@ -41,8 +41,8 @@ class ApplicationUseCaseImpl(
         ds.getByUserId(userId).filter { !it.status.isNegativelyTerminated }.takeIf { nonTerminated ->
             nonTerminated.none {
                 it.funding == application.funding &&
-                it.learningFormat == application.learningFormat &&
-                it.speciality == application.speciality
+                it.learningFormat.id == application.learningFormat.id &&
+                it.speciality.code == application.speciality.code
             }
         } ?: duplicate("Can't duplicate applications")
 

@@ -30,7 +30,9 @@ class ApplicationUseCaseImplTest {
         val newApplication = application(funding = Application.Funding.Budget)
         Mockito.`when`(ds.getByUserId(randomUserId)).thenReturn(listOf(
             application(
+                speciality = newApplication.speciality,
                 funding = Application.Funding.Budget,
+                learningFormat = newApplication.learningFormat,
                 status = Application.Status.Approved,
             ),
         ))

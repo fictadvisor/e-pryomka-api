@@ -1,6 +1,5 @@
 package com.fictadvisor.pryomka.api.routes
 
-import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.dto.ApplicationListDto
 import com.fictadvisor.pryomka.api.mappers.toDto
 import com.fictadvisor.pryomka.domain.interactors.ApplicationUseCase
@@ -14,12 +13,13 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.koin.ktor.ext.inject
 
 
-fun Route.operatorApplicationsRouters(
-    applicationUseCase: ApplicationUseCase = Provider.applicationUseCase,
-    getDocumentsUseCase: GetDocumentsUseCase = Provider.getDocumentsUseCase,
-) {
+fun Route.operatorApplicationsRouters() {
+    val applicationUseCase: ApplicationUseCase by inject()
+    val getDocumentsUseCase: GetDocumentsUseCase by inject()
+
     get("/applications") {
         val applications = applicationUseCase.getAll()
         call.respond(ApplicationListDto(applications.map(Application::toDto)))

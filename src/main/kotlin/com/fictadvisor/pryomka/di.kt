@@ -3,47 +3,46 @@ package com.fictadvisor.pryomka
 import com.fictadvisor.pryomka.data.datasources.*
 import com.fictadvisor.pryomka.domain.datasource.*
 import com.fictadvisor.pryomka.domain.interactors.*
+import io.ktor.application.*
+import org.koin.dsl.module
+import org.koin.ktor.ext.Koin
 
-/** Object that plays role of dependency locator.
- * TODO: replace with some DI framework. */
-object Provider {
-    val applicationUseCase: ApplicationUseCase by lazy {
-        ApplicationUseCaseImpl(applicationDataSource)
-    }
+val generalModule = module {
+    single<UserDataSource> { UserDataSourceImpl() }
+}
 
-    val changeApplicationStatusUseCase: ChangeApplicationStatusUseCase by lazy {
-        ChangeApplicationStatusUseCaseImpl(userDataSource, applicationDataSource, reviewsDataSource)
-    }
+val authModule = module {
+    single<TokenDataSource> { TokenDataSourceImpl() }
+    single<AuthUseCase> { AuthUseCaseImpl(get(), get()) }
+}
 
-    val getDocumentsUseCase: GetDocumentsUseCase by lazy {
-        GetDocumentsUseCaseImpl(documentContentDataSource, documentMetadataDataSource)
-    }
+val adminZoneModule = module {
+    single<RegisterStaffUseCase> { RegisterStaffUseCaseImpl(get()) }
+    single<OperatorManagementUseCases> { OperatorManagementUseCaseImpl(get(), get()) }
+}
 
-    val submitDocumentUseCase: SubmitDocumentUseCase by lazy {
-        SubmitDocumentUseCaseImpl(documentContentDataSource, documentMetadataDataSource)
-    }
+val applicationsModule = module {
+    single<ApplicationDataSource> { ApplicationDataSourceImpl() }
+    single<ApplicationUseCase> { ApplicationUseCaseImpl(get()) }
+    single<ReviewsDataSource> { ReviewsDataSourceImpl() }
 
-    val operatorManagementUseCases: OperatorManagementUseCases by lazy {
-        OperatorManagementUseCaseImpl(userDataSource, registerStaffUseCase)
-    }
+    single<ChangeApplicationStatusUseCase> { ChangeApplicationStatusUseCaseImpl(get(), get(), get()) }
+}
 
-    val authUseCase: AuthUseCase by lazy {
-        AuthUseCaseImpl(userDataSource, tokenDataSource)
-    }
+val documentsModule = module {
+    single<DocumentMetadataDataSource> { DocumentMetadataDataSourceImpl() }
+    single<DocumentContentDataSource> { FsDocumentContentDataSource(Environment.SECRET) }
 
-    val registerStaffUseCase: RegisterStaffUseCase by lazy {
-        RegisterStaffUseCaseImpl(userDataSource)
-    }
+    single<GetDocumentsUseCase> { GetDocumentsUseCaseImpl(get(), get()) }
+    single<SubmitDocumentUseCase> { SubmitDocumentUseCaseImpl(get(), get()) }
+}
 
-    private val userDataSource: UserDataSource by lazy { UserDataSourceImpl() }
-    private val applicationDataSource: ApplicationDataSource by lazy { ApplicationDataSourceImpl() }
-    private val documentContentDataSource: DocumentContentDataSource by lazy {
-        FsDocumentContentDataSource(Environment.SECRET)
-    }
-    private val documentMetadataDataSource: DocumentMetadataDataSource by lazy {
-        DocumentMetadataDataSourceImpl()
-    }
-    private val reviewsDataSource: ReviewsDataSource by lazy { ReviewsDataSourceImpl() }
-
-    private val tokenDataSource: TokenDataSource by lazy { TokenDataSourceImpl() }
+fun Application.configureDi() = install(Koin) {
+    modules(listOf(
+        generalModule,
+        authModule,
+        adminZoneModule,
+        applicationsModule,
+        documentsModule,
+    ))
 }

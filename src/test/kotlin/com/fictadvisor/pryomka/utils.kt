@@ -10,12 +10,17 @@ import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.testing.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.core.qualifier.Qualifier
+import org.koin.test.KoinTest
+import org.koin.test.mock.declareMock
 import org.mockito.Mockito
+import kotlin.reflect.KClass
 
 internal inline fun <reified T> any(): T = Mockito.any(T::class.java)
 internal inline fun <reified T> mock(): T = Mockito.mock(T::class.java)
@@ -124,4 +129,12 @@ fun telegramDataDto(
         data.photoUrl,
         hash,
     )
+}
+
+inline fun <reified T : Any> KoinTest.declareSuspendMock(
+    qualifier: Qualifier? = null,
+    secondaryTypes: List<KClass<*>> = emptyList(),
+    crossinline stubbing: suspend T.() -> Unit = {}
+): T = declareMock(qualifier, secondaryTypes) {
+    runBlocking { stubbing() }
 }

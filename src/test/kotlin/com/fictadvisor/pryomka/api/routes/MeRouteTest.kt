@@ -3,22 +3,34 @@ package com.fictadvisor.pryomka.api.routes
 import com.fictadvisor.pryomka.*
 import com.fictadvisor.pryomka.api.mappers.toWhoAmIDto
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCase
-import com.fictadvisor.pryomka.mock
-import com.fictadvisor.pryomka.whenever
-import com.fictadvisor.pryomka.withRouters
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
+import org.koin.dsl.module
+import org.koin.test.KoinTest
+import org.koin.test.KoinTestRule
+import org.koin.test.mock.MockProviderRule
+import org.koin.test.mock.declareMock
+import org.mockito.Mockito
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class MeRouteTest {
-    private val useCase: AuthUseCase = mock()
+class MeRouteTest : KoinTest {
+    @get:Rule
+    val mockProvider = MockProviderRule.create { clazz -> Mockito.mock(clazz.java) }
+
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {
+        modules(module {
+            single<AuthUseCase> { declareMock() }
+        })
+    }
 
     @Test
     fun `test GET me - unauthorized`() = runBlocking {
         // WHEN + THEN
-        withRouters({ meRoute(useCase) }) {
+        withRouters({ meRoute() }) {
             handleRequest(HttpMethod.Get, "/me").apply {
                 assertEquals(HttpStatusCode.Unauthorized, response.status())
             }
@@ -31,7 +43,7 @@ class MeRouteTest {
         val authorizationHeader = "Basic 123456"
 
         // WHEN
-        withRouters({ meRoute(useCase) }) {
+        withRouters({ meRoute() }) {
             val call = handleRequest(HttpMethod.Get, "/me") {
                 addHeader(HttpHeaders.Authorization, authorizationHeader)
             }
@@ -47,10 +59,10 @@ class MeRouteTest {
     fun `test GET me - user not found`() = runBlocking {
         // GIVEN
         val token = "123456"
-        whenever(useCase.getMe(token)).thenReturn(null)
+        declareSuspendMock<AuthUseCase> { whenever(getMe(token)).thenReturn(null) }
 
         // WHEN
-        withRouters({ meRoute(useCase) }) {
+        withRouters({ meRoute() }) {
             val call = handleRequest(HttpMethod.Get, "/me") {
                 addHeader(HttpHeaders.Authorization, "Bearer $token")
             }
@@ -66,10 +78,10 @@ class MeRouteTest {
     fun `test GET me - exception thrown`() = runBlocking {
         // GIVEN
         val token = "123456"
-        whenever(useCase.getMe(token)).thenThrow(IllegalStateException())
+        declareSuspendMock<AuthUseCase> { whenever(getMe(token)).thenThrow(IllegalStateException()) }
 
         // WHEN
-        withRouters({ meRoute(useCase) }) {
+        withRouters({ meRoute() }) {
             val call = handleRequest(HttpMethod.Get, "/me") {
                 addHeader(HttpHeaders.Authorization, "Bearer $token")
             }
@@ -86,10 +98,10 @@ class MeRouteTest {
         // GIVEN
         val token = "123456"
         val entrant = entrant()
-        whenever(useCase.getMe(token)).thenReturn(entrant)
+        declareSuspendMock<AuthUseCase> { whenever(getMe(token)).thenReturn(entrant) }
 
         // WHEN
-        withRouters({ meRoute(useCase) }) {
+        withRouters({ meRoute() }) {
             val call = handleRequest(HttpMethod.Get, "/me") {
                 addHeader(HttpHeaders.Authorization, "Bearer $token")
             }
@@ -107,10 +119,10 @@ class MeRouteTest {
         // GIVEN
         val token = "123456"
         val operator = operator()
-        whenever(useCase.getMe(token)).thenReturn(operator)
+        declareSuspendMock<AuthUseCase> { whenever(getMe(token)).thenReturn(operator) }
 
         // WHEN
-        withRouters({ meRoute(useCase) }) {
+        withRouters({ meRoute() }) {
             val call = handleRequest(HttpMethod.Get, "/me") {
                 addHeader(HttpHeaders.Authorization, "Bearer $token")
             }

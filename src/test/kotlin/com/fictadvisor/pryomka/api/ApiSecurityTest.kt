@@ -6,8 +6,6 @@ import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCase
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCaseImpl
 import com.fictadvisor.pryomka.domain.models.toUserIdentifier
-import com.fictadvisor.pryomka.mock
-import com.fictadvisor.pryomka.whenever
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -17,17 +15,26 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
+import org.koin.dsl.module
+import org.koin.ktor.ext.modules
+import org.koin.test.KoinTest
+import org.koin.test.KoinTestRule
+import org.koin.test.inject
+import org.koin.test.mock.MockProviderRule
+import org.koin.test.mock.declareMock
+import org.mockito.Mockito
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ApiSecurityTest {
+class ApiSecurityTest : KoinTest {
     private val entrant = entrant()
     private val operator = operator()
     private val admin = admin(id = "30b00eac-6e5b-4263-aef3-bde3140d7eb6".toUserIdentifier())
 
-    private val userDataSource: UserDataSource = mock()
-    private val tokenDataSource: TokenDataSource = mock()
+    private val authUseCase: AuthUseCase by inject()
+
     private val config = AuthUseCase.Config(
         accessTTL = 600 * 1000L,
         refreshTTL = 5000 * 60 * 1000L,
@@ -38,13 +45,24 @@ class ApiSecurityTest {
         tgBotId = "4002278938:ABGEHE_2_9razcj9t1zAw1JaYA31zz16bQp",
     )
     private val telegramData = telegramData(tgBotId = config.tgBotId)
-    private val authUseCase: AuthUseCase = AuthUseCaseImpl(userDataSource, tokenDataSource, config)
+
+    @get:Rule
+    val mockProvider = MockProviderRule.create { clazz -> Mockito.mock(clazz.java) }
+
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {
+        modules(
+            module {
+                single<AuthUseCase> { AuthUseCaseImpl(get(), get(), config) }
+            }
+        )
+    }
 
     private fun withProtectedTestApp(
         test: TestApplicationEngine.() -> Unit
     ) = withTestApplication({
         install(ContentNegotiation) { json() }
-        configureSecurity(authUseCase)
+        configureSecurity()
 
         routing {
             authenticate(AUTH_GENERAL) {
@@ -68,16 +86,20 @@ class ApiSecurityTest {
     }, test)
 
     @BeforeTest
-    fun init(): Unit = runBlocking {
-        whenever(userDataSource.findEntrant(entrant.id)).thenReturn(entrant)
-        whenever(userDataSource.findEntrantByTelegramId(telegramData.id)).thenReturn(entrant)
-        whenever(userDataSource.findEntrant(operator.id)).thenReturn(null)
-        whenever(userDataSource.findEntrant(admin.id)).thenReturn(null)
-        whenever(userDataSource.findStaff(entrant.id)).thenReturn(null)
-        whenever(userDataSource.findStaff(operator.id)).thenReturn(operator)
-        whenever(userDataSource.findStaff(admin.id)).thenReturn(admin)
-        whenever(userDataSource.findStaffByCredentials("operator", "operator")).thenReturn(operator)
-        whenever(userDataSource.findStaffByCredentials("admin", "admin")).thenReturn(admin)
+    fun init() {
+        declareSuspendMock<UserDataSource> {
+            whenever(findEntrant(entrant.id)).thenReturn(entrant)
+            whenever(findEntrantByTelegramId(telegramData.id)).thenReturn(entrant)
+            whenever(findEntrant(operator.id)).thenReturn(null)
+            whenever(findEntrant(admin.id)).thenReturn(null)
+            whenever(findStaff(entrant.id)).thenReturn(null)
+            whenever(findStaff(operator.id)).thenReturn(operator)
+            whenever(findStaff(admin.id)).thenReturn(admin)
+            whenever(findStaffByCredentials("operator", "operator")).thenReturn(operator)
+            whenever(findStaffByCredentials("admin", "admin")).thenReturn(admin)
+        }
+
+        declareMock<TokenDataSource> {}
     }
 
     @Test

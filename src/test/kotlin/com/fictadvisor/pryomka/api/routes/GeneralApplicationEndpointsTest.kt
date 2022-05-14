@@ -6,11 +6,11 @@ import com.fictadvisor.pryomka.api.configureSecurity
 import com.fictadvisor.pryomka.api.dto.ChangeApplicationStatusDto
 import com.fictadvisor.pryomka.domain.datasource.TokenDataSource
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
-import com.fictadvisor.pryomka.domain.interactors.*
+import com.fictadvisor.pryomka.domain.interactors.AuthUseCase
+import com.fictadvisor.pryomka.domain.interactors.AuthUseCaseImpl
+import com.fictadvisor.pryomka.domain.interactors.ChangeApplicationStatusUseCase
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
-import com.fictadvisor.pryomka.mock
-import com.fictadvisor.pryomka.whenever
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -19,14 +19,29 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
+import org.koin.dsl.module
+import org.koin.test.KoinTest
+import org.koin.test.KoinTestRule
+import org.koin.test.inject
+import org.koin.test.mock.MockProviderRule
+import org.koin.test.mock.declareMock
+import org.mockito.Mockito
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class GeneralApplicationEndpointsTest {
-    private val useCase: ChangeApplicationStatusUseCase = mock()
-    private val userDataSource: UserDataSource = mock()
-    private val tokenDataSource: TokenDataSource = mock()
+class GeneralApplicationEndpointsTest : KoinTest {
+    @get:Rule
+    val mockProvider = MockProviderRule.create { clazz -> Mockito.mock(clazz.java) }
+
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {
+        modules(module {
+            single<AuthUseCase> { AuthUseCaseImpl(get(), get(), config) }
+        })
+    }
+
     private val config = AuthUseCase.Config(
         accessTTL = 600 * 1000L,
         refreshTTL = 5000 * 60 * 1000L,
@@ -36,7 +51,7 @@ class GeneralApplicationEndpointsTest {
         realm = "vstup",
         tgBotId = "4002278938:ABGEHE_2_9razcj9t1zAw1JaYA31zz16bQp",
     )
-    private val authUseCase: AuthUseCase = AuthUseCaseImpl(userDataSource, tokenDataSource, config)
+    private val authUseCase: AuthUseCase by inject()
     private val admin = admin()
 
     private inline fun withGeneralApplicationsRouters(
@@ -44,11 +59,10 @@ class GeneralApplicationEndpointsTest {
     ) {
         withTestApplication({
             install(ContentNegotiation) { json() }
+            configureSecurity()
             routing {
-                configureSecurity(authUseCase)
-
                 authenticate(AUTH_GENERAL) {
-                    generalApplicationsRouters(useCase)
+                    generalApplicationsRouters()
                 }
             }
         }) {
@@ -57,9 +71,14 @@ class GeneralApplicationEndpointsTest {
     }
 
     @BeforeTest
-    fun init(): Unit = runBlocking {
-        whenever(userDataSource.findStaffByCredentials(any(), any())).thenReturn(admin)
-        whenever(userDataSource.findStaff(any(), any())).thenReturn(admin)
+    fun init() {
+        declareSuspendMock<UserDataSource> {
+            whenever(findStaffByCredentials(any(), any())).thenReturn(admin)
+            whenever(findStaff(any(), any())).thenReturn(admin)
+        }
+
+        declareMock<TokenDataSource> {}
+        declareMock<ChangeApplicationStatusUseCase> {}
     }
 
     @Test
@@ -109,8 +128,11 @@ class GeneralApplicationEndpointsTest {
         val (token) = authUseCase.logIn("admin", "admin")
         val changeStatusDto = ChangeApplicationStatusDto(Application.Status.Approved)
 
-        whenever(useCase.changeStatus(id, admin.id, Application.Status.Approved, null))
-            .thenThrow(Unauthorized())
+        declareSuspendMock<ChangeApplicationStatusUseCase> {
+            whenever(
+                changeStatus(id, admin.id, Application.Status.Approved, null)
+            ).thenThrow(Unauthorized())
+        }
 
         // WHEN + THEN
         withGeneralApplicationsRouters {
@@ -132,8 +154,10 @@ class GeneralApplicationEndpointsTest {
         val (token) = authUseCase.logIn("admin", "admin")
         val changeStatusDto = ChangeApplicationStatusDto(Application.Status.Approved)
 
-        whenever(useCase.changeStatus(id, admin.id, Application.Status.Approved, null))
-            .thenThrow(NotFound("Application not found"))
+        declareSuspendMock<ChangeApplicationStatusUseCase> {
+            whenever(changeStatus(id, admin.id, Application.Status.Approved, null))
+                .thenThrow(NotFound("Application not found"))
+        }
 
         // WHEN + THEN
         withGeneralApplicationsRouters {
@@ -156,8 +180,10 @@ class GeneralApplicationEndpointsTest {
         val (token) = authUseCase.logIn("admin", "admin")
         val changeStatusDto = ChangeApplicationStatusDto(Application.Status.Approved)
 
-        whenever(useCase.changeStatus(id, admin.id, Application.Status.Approved, null))
-            .thenThrow(PermissionDenied("You have no rights to perform this action"))
+        declareSuspendMock<ChangeApplicationStatusUseCase> {
+            whenever(changeStatus(id, admin.id, Application.Status.Approved, null))
+                .thenThrow(PermissionDenied("You have no rights to perform this action"))
+        }
 
         // WHEN + THEN
         withGeneralApplicationsRouters {

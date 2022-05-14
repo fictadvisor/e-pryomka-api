@@ -1,6 +1,5 @@
 package com.fictadvisor.pryomka.api.routes
 
-import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.dto.ApplicationListDto
 import com.fictadvisor.pryomka.api.dto.ApplicationRequestDto
 import com.fictadvisor.pryomka.api.mappers.toDomain
@@ -10,7 +9,6 @@ import com.fictadvisor.pryomka.domain.interactors.SubmitDocumentUseCase
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.utils.pathFor
-import com.fictadvisor.pryomka.utils.toUUIDOrNull
 import com.fictadvisor.pryomka.utils.userId
 import io.ktor.application.*
 import io.ktor.http.*
@@ -19,12 +17,13 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.async
+import org.koin.ktor.ext.inject
 import java.io.InputStream
 
-fun Route.myApplicationsRouters(
-    applicationUseCase: ApplicationUseCase = Provider.applicationUseCase,
-    submitDocumentUseCase: SubmitDocumentUseCase = Provider.submitDocumentUseCase,
-) {
+fun Route.myApplicationsRouters() {
+    val applicationUseCase: ApplicationUseCase by inject()
+    val submitDocumentUseCase: SubmitDocumentUseCase by inject()
+
     get("/applications/my") {
         val userId = call.userId ?: run {
             call.respond(HttpStatusCode.Unauthorized)

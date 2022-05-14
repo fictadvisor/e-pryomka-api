@@ -1,6 +1,5 @@
 package com.fictadvisor.pryomka.api.routes
 
-import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.mappers.toWhoAmIDto
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCase
 import io.ktor.application.*
@@ -8,8 +7,11 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.koin.ktor.ext.inject
 
-fun Route.meRoute(authUseCase: AuthUseCase = Provider.authUseCase) {
+fun Route.meRoute() {
+    val authUseCase: AuthUseCase by inject()
+
     get("/me") {
         val token = call.request
             .header("Authorization")

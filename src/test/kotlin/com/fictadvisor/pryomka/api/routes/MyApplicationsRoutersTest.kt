@@ -14,8 +14,6 @@ import com.fictadvisor.pryomka.domain.interactors.AuthUseCaseImpl
 import com.fictadvisor.pryomka.domain.interactors.SubmitDocumentUseCase
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.Duplicated
-import com.fictadvisor.pryomka.mock
-import com.fictadvisor.pryomka.whenever
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -24,15 +22,32 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
+import org.koin.dsl.module
+import org.koin.test.KoinTest
+import org.koin.test.KoinTestRule
+import org.koin.test.inject
+import org.koin.test.mock.MockProviderRule
+import org.koin.test.mock.declareMock
+import org.mockito.Mockito
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class MyApplicationsRoutersTest {
-    private val applicationUseCase: ApplicationUseCase = mock()
-    private val submitDocumentUseCase: SubmitDocumentUseCase = mock()
-    private val userDataSource: UserDataSource = mock()
-    private val tokenDataSource: TokenDataSource = mock()
+class MyApplicationsRoutersTest : KoinTest {
+    @get:Rule
+    val mockProvider = MockProviderRule.create { clazz -> Mockito.mock(clazz.java) }
+
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {
+        modules(module {
+            single<ApplicationUseCase> { declareMock() }
+            single<SubmitDocumentUseCase> { declareMock() }
+            single<TokenDataSource> { declareMock() }
+            single<AuthUseCase> { AuthUseCaseImpl(get(), get(), config) }
+        })
+    }
+
     private val config = AuthUseCase.Config(
         accessTTL = 600 * 1000L,
         refreshTTL = 5000 * 60 * 1000L,
@@ -42,7 +57,7 @@ class MyApplicationsRoutersTest {
         realm = "vstup",
         tgBotId = "4002278938:ABGEHE_2_9razcj9t1zAw1JaYA31zz16bQp",
     )
-    private val authUseCase: AuthUseCase = AuthUseCaseImpl(userDataSource, tokenDataSource, config)
+    private val authUseCase: AuthUseCase by inject()
     private val entrant = entrant()
     private val telegramData = telegramData(id = entrant.telegramId, tgBotId = config.tgBotId)
 
@@ -51,11 +66,10 @@ class MyApplicationsRoutersTest {
     ) {
         withTestApplication({
             install(ContentNegotiation) { json() }
+            configureSecurity()
             routing {
-                configureSecurity(authUseCase)
-
                 authenticate(AUTH_ENTRANT) {
-                    myApplicationsRouters(applicationUseCase, submitDocumentUseCase)
+                    myApplicationsRouters()
                 }
             }
         }) {
@@ -64,9 +78,11 @@ class MyApplicationsRoutersTest {
     }
 
     @BeforeTest
-    fun init(): Unit = runBlocking {
-        whenever(userDataSource.findEntrant(entrant.id)).thenReturn(entrant)
-        whenever(userDataSource.findEntrantByTelegramId(entrant.telegramId)).thenReturn(entrant)
+    fun init() {
+        declareSuspendMock<UserDataSource> {
+            whenever(findEntrant(entrant.id)).thenReturn(entrant)
+            whenever(findEntrantByTelegramId(entrant.telegramId)).thenReturn(entrant)
+        }
     }
 
     @Test
@@ -81,7 +97,9 @@ class MyApplicationsRoutersTest {
 
         val dto = ApplicationListDto(applications.map { it.toDto() })
 
-        whenever(applicationUseCase.getByUserId(entrant.id)).thenReturn(applications)
+        declareSuspendMock<ApplicationUseCase> {
+            whenever(getByUserId(entrant.id)).thenReturn(applications)
+        }
 
         // WHEN + THEN
         withMyApplicationsRouters {
@@ -102,7 +120,9 @@ class MyApplicationsRoutersTest {
         val (token, _) = authUseCase.exchange(telegramData)
         val dto = ApplicationListDto(listOf())
 
-        whenever(applicationUseCase.getByUserId(entrant.id)).thenReturn(listOf())
+        declareSuspendMock<ApplicationUseCase> {
+            whenever(getByUserId(entrant.id)).thenReturn(listOf())
+        }
 
         // WHEN + THEN
         withMyApplicationsRouters {
@@ -150,8 +170,9 @@ class MyApplicationsRoutersTest {
             learningFormat = Application.LearningFormat.FullTime,
         )
 
-        whenever(applicationUseCase.create(any(), any()))
-            .thenThrow(Duplicated("Application already exists"))
+        declareSuspendMock<ApplicationUseCase> {
+            whenever(create(any(), any())).thenThrow(Duplicated("Application already exists"))
+        }
 
         // WHEN + THEN
         withMyApplicationsRouters {

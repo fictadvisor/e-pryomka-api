@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-fun initDB() {
+fun configureDB() {
     val properties = Properties().apply {
         setProperty("dataSourceClassName", Environment.DB_SOURCE_CLASS_NAME)
         setProperty("dataSource.serverName", Environment.DB_HOST)

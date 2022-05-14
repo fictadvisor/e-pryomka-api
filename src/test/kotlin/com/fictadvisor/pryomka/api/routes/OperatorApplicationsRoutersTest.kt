@@ -5,19 +5,27 @@ import com.fictadvisor.pryomka.api.dto.ApplicationListDto
 import com.fictadvisor.pryomka.api.mappers.toDto
 import com.fictadvisor.pryomka.domain.interactors.ApplicationUseCase
 import com.fictadvisor.pryomka.domain.interactors.GetDocumentsUseCase
-import com.fictadvisor.pryomka.domain.models.*
-import com.fictadvisor.pryomka.mock
-import com.fictadvisor.pryomka.whenever
-import com.fictadvisor.pryomka.withRouters
+import com.fictadvisor.pryomka.domain.models.DocumentMetadata
+import com.fictadvisor.pryomka.domain.models.DocumentType
+import com.fictadvisor.pryomka.domain.models.Path
+import com.fictadvisor.pryomka.domain.models.generateApplicationId
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
+import org.koin.test.KoinTest
+import org.koin.test.KoinTestRule
+import org.koin.test.mock.MockProviderRule
+import org.mockito.Mockito
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class OperatorApplicationsRoutersTest {
-    private val applicationUseCase: ApplicationUseCase = mock()
-    private val getDocumentsUseCase: GetDocumentsUseCase = mock()
+class OperatorApplicationsRoutersTest : KoinTest {
+    @get:Rule
+    val mockProvider = MockProviderRule.create { clazz -> Mockito.mock(clazz.java) }
+
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {}
 
     @Test
     fun `test GET applications`() = runBlocking {
@@ -30,10 +38,12 @@ class OperatorApplicationsRoutersTest {
 
         val dto = ApplicationListDto(applications.map { it.toDto() })
 
-        whenever(applicationUseCase.getAll()).thenReturn(applications)
+        declareSuspendMock<ApplicationUseCase> {
+            whenever(getAll()).thenReturn(applications)
+        }
 
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(dto, response.body())
@@ -45,10 +55,12 @@ class OperatorApplicationsRoutersTest {
     fun `test GET applications - empty list`() = runBlocking {
         // GIVEN
         val dto = ApplicationListDto(listOf())
-        whenever(applicationUseCase.getAll()).thenReturn(listOf())
+        declareSuspendMock<ApplicationUseCase> {
+            whenever(getAll()).thenReturn(listOf())
+        }
 
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(dto, response.body())
@@ -60,10 +72,12 @@ class OperatorApplicationsRoutersTest {
     fun `test GET application by id`() = runBlocking {
         // GIVEN
         val application = application()
-        whenever(applicationUseCase.getById(application.id)).thenReturn(application)
+        declareSuspendMock<ApplicationUseCase> {
+            whenever(getById(application.id)).thenReturn(application)
+        }
 
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications/${application.id.value}").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(application.toDto(), response.body())
@@ -75,10 +89,12 @@ class OperatorApplicationsRoutersTest {
     fun `test GET application by id - not found`() = runBlocking {
         // GIVEN
         val application = application()
-        whenever(applicationUseCase.getById(application.id)).thenReturn(null)
+        declareSuspendMock<ApplicationUseCase> {
+            whenever(getById(application.id)).thenReturn(null)
+        }
 
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications/${application.id.value}").apply {
                 assertEquals(HttpStatusCode.NotFound, response.status())
             }
@@ -88,7 +104,7 @@ class OperatorApplicationsRoutersTest {
     @Test
     fun `test GET application by id - invalid id`() {
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications/lelouch").apply {
                 assertEquals(HttpStatusCode.BadRequest, response.status())
                 assertEquals("Invalid application id", response.content)
@@ -99,7 +115,7 @@ class OperatorApplicationsRoutersTest {
     @Test
     fun `test GET application documents - invalid id`() {
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications/lelouch/documents").apply {
                 assertEquals(HttpStatusCode.BadRequest, response.status())
                 assertEquals("Invalid application id", response.content)
@@ -113,7 +129,7 @@ class OperatorApplicationsRoutersTest {
         val id = generateApplicationId().value
 
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications/${id}/documents").apply {
                 assertEquals(HttpStatusCode.BadRequest, response.status())
                 assertEquals("Document type should be provided", response.content)
@@ -127,7 +143,7 @@ class OperatorApplicationsRoutersTest {
         val id = generateApplicationId().value
 
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications/${id}/documents?type=lelouch").apply {
                 assertEquals(HttpStatusCode.BadRequest, response.status())
                 assertEquals("Document type should be provided", response.content)
@@ -140,10 +156,12 @@ class OperatorApplicationsRoutersTest {
         // GIVEN
         val type = DocumentType.Contract
         val id = generateApplicationId()
-        whenever(getDocumentsUseCase.get(id, type)).thenReturn(null)
+        declareSuspendMock<GetDocumentsUseCase> {
+            whenever(get(id, type)).thenReturn(null)
+        }
 
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications/${id.value}/documents?type=${type.name}").apply {
                 assertEquals(HttpStatusCode.NotFound, response.status())
             }
@@ -171,11 +189,12 @@ class OperatorApplicationsRoutersTest {
             "contract.doc",
         ).toString()
 
-
-        whenever(getDocumentsUseCase.get(id, type)).thenReturn(metadata to content.byteInputStream())
+        declareSuspendMock<GetDocumentsUseCase> {
+            whenever(get(id, type)).thenReturn(metadata to content.byteInputStream())
+        }
 
         // WHEN + THEN
-        withRouters({ operatorApplicationsRouters(applicationUseCase, getDocumentsUseCase) }) {
+        withRouters({ operatorApplicationsRouters() }) {
             handleRequest(HttpMethod.Get, "/applications/${id.value}/documents?type=${type.name}").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(fileNameHeader, response.headers[HttpHeaders.ContentDisposition])

@@ -1,6 +1,5 @@
 package com.fictadvisor.pryomka.api.routes
 
-import com.fictadvisor.pryomka.Provider
 import com.fictadvisor.pryomka.api.dto.CreateOperatorDto
 import com.fictadvisor.pryomka.api.mappers.toUserListDto
 import com.fictadvisor.pryomka.domain.interactors.OperatorManagementUseCases
@@ -9,10 +8,11 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import org.koin.ktor.ext.inject
 
-fun Route.operatorsRoutes(
-    useCase: OperatorManagementUseCases = Provider.operatorManagementUseCases,
-) {
+fun Route.operatorsRoutes() {
+    val useCase: OperatorManagementUseCases by inject()
+
     get("/operators") {
         val users = useCase.getAll()
         call.respond(users.toUserListDto())

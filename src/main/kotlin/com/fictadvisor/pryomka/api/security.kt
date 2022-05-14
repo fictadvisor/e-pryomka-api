@@ -8,13 +8,16 @@ import com.fictadvisor.pryomka.domain.models.toUserIdentifierOrNull
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
+import org.koin.ktor.ext.inject
 
 const val AUTH_GENERAL = "auth_general"
 const val AUTH_ENTRANT = "entrant"
 const val AUTH_OPERATOR = "operator"
 const val AUTH_ADMIN = "admin"
 
-fun Application.configureSecurity(authUseCase: AuthUseCase) {
+fun Application.configureSecurity() {
+    val authUseCase: AuthUseCase by inject()
+
     fun jwt() = JWT.require(Algorithm.HMAC256(authUseCase.config.secret))
         .withAudience(authUseCase.config.audience)
         .withIssuer(authUseCase.config.issuer)

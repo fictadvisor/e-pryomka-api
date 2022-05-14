@@ -1,6 +1,7 @@
 package domain.interactor
 
 import domain.datasource.LossesDataSource
+import domain.model.LossesCategory
 import domain.model.TotalLosses
 import domain.model.TotalLossesLocalized
 import kotlinx.datetime.Clock
@@ -24,13 +25,21 @@ class GetLossesUseCase(
             }
         }
         println("Parsing losses from the network")
-        val losses = remote.getLosses()
+        val losses = normalizeLosses(remote.getLosses())
         cache = now to losses
         return translate(locale, losses)
     }
 
     fun invalidateCache() {
         cache = null
+    }
+
+    private fun normalizeLosses(losses: TotalLosses) = losses.mapValues { (_, dailyLosses) ->
+        LossesCategory.values()
+            .associateWith { dailyLosses[it] ?: 0 }
+            .let {
+                if (it[LossesCategory.Other] == 0L) it - LossesCategory.Other else it
+            }
     }
 
     private fun translate(locale: Locale?, losses: TotalLosses): TotalLossesLocalized {

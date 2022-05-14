@@ -4,6 +4,8 @@ import com.fictadvisor.pryomka.api.dto.TelegramDataDto
 import com.fictadvisor.pryomka.data.encryption.Hash
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
+import com.fictadvisor.pryomka.domain.models.faculty.LearningFormat
+import com.fictadvisor.pryomka.domain.models.faculty.Speciality
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -72,8 +74,8 @@ fun application(
     userId: UserIdentifier = generateUserId(),
     documents: Set<DocumentType> = setOf(),
     funding: Application.Funding = Application.Funding.Budget,
-    speciality: Application.Speciality = Application.Speciality.SPEC_121,
-    learningFormat: Application.LearningFormat = Application.LearningFormat.FullTime,
+    speciality: Speciality = Speciality(121, "Software Engineering"),
+    learningFormat: LearningFormat = LearningFormat(generateLearningFormatId(), "Full time studying"),
     createdAt: Instant = Clock.System.now(),
     status: Application.Status = Application.Status.Pending,
     statusMsg: String? = null,

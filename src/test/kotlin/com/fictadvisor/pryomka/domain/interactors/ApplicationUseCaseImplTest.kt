@@ -2,10 +2,9 @@ package com.fictadvisor.pryomka.domain.interactors
 
 import com.fictadvisor.pryomka.application
 import com.fictadvisor.pryomka.domain.datasource.ApplicationDataSource
-import com.fictadvisor.pryomka.domain.models.Application
-import com.fictadvisor.pryomka.domain.models.Duplicated
-import com.fictadvisor.pryomka.domain.models.generateApplicationId
-import com.fictadvisor.pryomka.domain.models.generateUserId
+import com.fictadvisor.pryomka.domain.models.*
+import com.fictadvisor.pryomka.domain.models.faculty.LearningFormat
+import com.fictadvisor.pryomka.domain.models.faculty.Speciality
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
@@ -16,21 +15,22 @@ import kotlin.test.assertEquals
 class ApplicationUseCaseImplTest {
     private val ds = Mockito.mock(ApplicationDataSource::class.java)
     private val useCase = ApplicationUseCaseImpl(ds)
+    
+    private val fullTime = LearningFormat(generateLearningFormatId(), "full time studying")
+    private val partTime = LearningFormat(generateLearningFormatId(), "part time studying")
+    
+    private val spec121 = Speciality(121, "Software Engineering")
+    private val spec123 = Speciality(123, "Computer Engineering")
+    private val spec126 = Speciality(126, "Information Systems & Technologies")
 
     @Test
     fun `duplicate exc if another non neg terminated exists with the same params`(): Unit = runBlocking {
         // given
         val randomUserId = generateUserId()
-        val newApplication = application(
-            funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
-            speciality = Application.Speciality.SPEC_121,
-        )
+        val newApplication = application(funding = Application.Funding.Budget)
         Mockito.`when`(ds.getByUserId(randomUserId)).thenReturn(listOf(
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_121,
                 status = Application.Status.Approved,
             ),
         ))
@@ -47,32 +47,32 @@ class ApplicationUseCaseImplTest {
         val randomUserId = generateUserId()
         val newApplication = application(
             funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
-            speciality = Application.Speciality.SPEC_121,
+            learningFormat = fullTime,
+            speciality = spec121,
         )
         Mockito.`when`(ds.getByUserId(randomUserId)).thenReturn(listOf(
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_123,
+                learningFormat = fullTime,
+                speciality = spec123,
                 status = Application.Status.Approved,
             ),
             application(
                 funding = Application.Funding.Contract,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_121,
+                learningFormat = fullTime,
+                speciality = spec121,
                 status = Application.Status.Approved,
             ),
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.PartTime,
-                speciality = Application.Speciality.SPEC_123,
+                learningFormat = partTime,
+                speciality = spec123,
                 status = Application.Status.Approved,
             ),
             application(
                 funding = Application.Funding.Contract,
-                learningFormat = Application.LearningFormat.PartTime,
-                speciality = Application.Speciality.SPEC_126,
+                learningFormat = partTime,
+                speciality = spec126,
                 status = Application.Status.Approved,
             ),
         ))
@@ -81,7 +81,7 @@ class ApplicationUseCaseImplTest {
         useCase.create(newApplication, randomUserId)
 
         // then
-        Mockito.verify(ds, Mockito.times(1))
+        Mockito.verify(ds, times(1))
             .create(newApplication)
     }
 
@@ -91,20 +91,20 @@ class ApplicationUseCaseImplTest {
         val randomUserId = generateUserId()
         val newApplication = application(
             funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
-            speciality = Application.Speciality.SPEC_121,
+            learningFormat = fullTime,
+            speciality = spec121,
         )
         Mockito.`when`(ds.getByUserId(randomUserId)).thenReturn(listOf(
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_121,
+                learningFormat = fullTime,
+                speciality = spec121,
                 status = Application.Status.Cancelled,
             ),
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_121,
+                learningFormat = fullTime,
+                speciality = spec121,
                 status = Application.Status.Rejected,
             ),
         ))
@@ -113,7 +113,7 @@ class ApplicationUseCaseImplTest {
         useCase.create(newApplication, randomUserId)
 
         // then
-        Mockito.verify(ds, Mockito.times(1))
+        Mockito.verify(ds, times(1))
             .create(newApplication)
     }
 
@@ -124,14 +124,14 @@ class ApplicationUseCaseImplTest {
         val applications = listOf(
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_121,
+                learningFormat = fullTime,
+                speciality = spec121,
                 status = Application.Status.Cancelled,
             ),
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_121,
+                learningFormat = fullTime,
+                speciality = spec121,
                 status = Application.Status.Rejected,
             ),
         )
@@ -149,8 +149,8 @@ class ApplicationUseCaseImplTest {
         val id = generateApplicationId()
         val application = application(
             funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
-            speciality = Application.Speciality.SPEC_121,
+            learningFormat = fullTime,
+            speciality = spec121,
             status = Application.Status.Cancelled,
         )
 
@@ -167,8 +167,8 @@ class ApplicationUseCaseImplTest {
         val userId = generateUserId()
         val application = application(
             funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
-            speciality = Application.Speciality.SPEC_121,
+            learningFormat = fullTime,
+            speciality = spec121,
             status = Application.Status.Cancelled,
         )
 
@@ -185,14 +185,14 @@ class ApplicationUseCaseImplTest {
         val applications = listOf(
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_121,
+                learningFormat = fullTime,
+                speciality = spec121,
                 status = Application.Status.Cancelled,
             ),
             application(
                 funding = Application.Funding.Budget,
-                learningFormat = Application.LearningFormat.FullTime,
-                speciality = Application.Speciality.SPEC_121,
+                learningFormat = fullTime,
+                speciality = spec121,
                 status = Application.Status.Rejected,
             ),
         )

@@ -11,6 +11,9 @@ data class DocumentIdentifier(val value: UUID)
 /** Application unique identifier. Represented by a random UUID value. */
 data class ApplicationIdentifier(val value: UUID)
 
+/** Learning Format unique identifier. Represented by a random UUID value. */
+data class LearningFormatIdentifier(val value: UUID)
+
 /** Document encryption key used to access document content. */
 typealias DocumentKey = String
 
@@ -22,6 +25,9 @@ fun generateDocumentId() = DocumentIdentifier(UUID.randomUUID())
 
 /** Generates new random [ApplicationIdentifier]. */
 fun generateApplicationId() = ApplicationIdentifier(UUID.randomUUID())
+
+/** Generates new random [LearningFormatIdentifier]. */
+fun generateLearningFormatId() = LearningFormatIdentifier(UUID.randomUUID())
 
 /** Parses [UserIdentifier] from the string.
  * @return parsed identifier
@@ -38,6 +44,11 @@ fun String.toDocumentIdentifier() = DocumentIdentifier(UUID.fromString(this))
  * @throws IllegalArgumentException */
 fun String.toApplicationIdentifier() = ApplicationIdentifier(UUID.fromString(this))
 
+/** Parses [LearningFormatIdentifier] from the string.
+ * @return parsed identifier
+ * @throws IllegalArgumentException */
+fun String.toLearningFormatIdentifier() = LearningFormatIdentifier(UUID.fromString(this))
+
 /** Parses [UserIdentifier] from the string.
  * @return parsed identifier or null if exception has occurred */
 fun String.toUserIdentifierOrNull() = runCatching { toUserIdentifier() }.getOrNull()
@@ -49,3 +60,7 @@ fun String.toDocumentIdentifierOrNull() = runCatching { toDocumentIdentifier() }
 /** Parses [ApplicationIdentifier] from the string.
  * @return parsed identifier or null if exception has occurred */
 fun String.toApplicationIdentifierOrNull() = runCatching { toApplicationIdentifier() }.getOrNull()
+
+/** Parses [LearningFormatIdentifier] from the string.
+ * @return parsed identifier or null if exception has occurred */
+fun String.toLearningFormatIdentifierOrNull() = runCatching { toLearningFormatIdentifier() }.getOrNull()

@@ -4,8 +4,13 @@ import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.DocumentType
 import com.fictadvisor.pryomka.domain.models.TokenMetadata
 import com.fictadvisor.pryomka.domain.models.User
+import kotlinx.coroutines.CoroutineDispatcher
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 object Entrants : Table() {
     val id = uuid("id").autoGenerate()
@@ -31,9 +36,9 @@ object Staff : Table() {
 object Applications : Table() {
     val id = uuid("id").autoGenerate()
     val userId = uuid("user_id") references Entrants.id
-    val speciality = enumeration("speciality", Application.Speciality::class)
+    val speciality = uuid("speciality_id").references(Specialities.id, onDelete = ReferenceOption.CASCADE)
     val funding = enumeration("funding", Application.Funding::class)
-    val learningFormat = enumeration("learning_format", Application.LearningFormat::class)
+    val learningFormat = uuid("learning_format_id").references(LearningFormats.id, onDelete = ReferenceOption.CASCADE)
     val createdAt = timestamp("creation_time")
     val status = enumeration("status", Application.Status::class)
     val statusMessage = varchar("status_message", 256).nullable().default(null)
@@ -71,3 +76,37 @@ object Tokens : Table() {
     val validUntil = timestamp("valid_until")
     val type = enumeration("type", TokenMetadata.Type::class)
 }
+
+object LearningFormats : Table("learning_formats") {
+    val id = uuid("id").autoGenerate()
+    val name = varchar("name",  64).uniqueIndex()
+
+    override val primaryKey: PrimaryKey = PrimaryKey(id)
+}
+
+object Specialities : Table() {
+    val id = uuid("id").autoGenerate().uniqueIndex()
+    val code = integer("code").uniqueIndex()
+    val name = varchar("name",  256)
+
+    override val primaryKey: PrimaryKey = PrimaryKey(LearningFormats.id)
+}
+
+object SpecialitiesFormats : Table("specialities_formats") {
+    val id = integer("id").autoIncrement()
+    val speciality = uuid("speciality_id").references(Specialities.id, onDelete = ReferenceOption.CASCADE)
+    val learningFormat = uuid("learning_format_id").references(LearningFormats.id, onDelete = ReferenceOption.CASCADE)
+
+    override val primaryKey: PrimaryKey = PrimaryKey(id)
+
+    init {
+        uniqueIndex(speciality, learningFormat)
+    }
+}
+
+suspend fun <T> db(
+    context: CoroutineDispatcher? = null,
+    db: Database? = null,
+    transactionIsolation: Int? = null,
+    statement: suspend Transaction.() -> T
+): T = newSuspendedTransaction(context, db, transactionIsolation, statement)

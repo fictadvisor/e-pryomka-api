@@ -118,24 +118,11 @@ components:
           type: string
       required: [login, password]
 
-    Speciality:
-      type: string
-      enum:
-        - SPEC_121
-        - SPEC_123
-        - SPEC_126
-
     Funding:
       type: string
       enum:
         - Budget
         - Contract
-
-    LearningFormat:
-      type: string
-      enum:
-        - FullTime
-        - PartTime
 
     DocumentType:
       type: string
@@ -168,11 +155,11 @@ components:
       type: object
       properties:
         speciality:
-          $ref: "#/components/schemas/Speciality"
+          $ref: "#/components/schemas/SpecialityDto"
         funding:
           $ref: "#/components/schemas/Funding"
         learning_format:
-          $ref: "#/components/schemas/LearningFormat"
+          $ref: "#/components/schemas/LearningFormatDto"
       required: [speciality, funding, learning_format]
 
     ApplicationResponseDto:
@@ -185,11 +172,11 @@ components:
           items:
             $ref: "#/components/schemas/DocumentType"
         speciality:
-          $ref: "#/components/schemas/Speciality"
+          $ref: "#/components/schemas/SpecialityDto"
         funding:
           $ref: "#/components/schemas/Funding"
         learning_format:
-          $ref: "#/components/schemas/LearningFormat"
+          $ref: "#/components/schemas/LearningFormatDto"
         created_at:
           type: string
         status:
@@ -208,6 +195,69 @@ components:
             $ref: "#/components/schemas/ApplicationResponseDto"
       required: [applications]
 
+    AllDetailedSpecialitiesDto:
+      type: object
+      properties:
+        specialities:
+          type: array
+          items:
+            $ref: "#/components/schemas/SpecialityDetailedDto"
+      required: [specialities]
+
+    AllLearningFormatsDto:
+      type: object
+      properties:
+        formats:
+          type: array
+          items:
+            $ref: "#/components/schemas/LearningFormatDto"
+      required: [formats]
+
+    CreateLearningFormatDto:
+      type: object
+      properties:
+        name:
+          type: string
+      required: [name]
+
+    LearningFormatDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required: [id, name]
+
+    SpecialityDetailedDto:
+      type: object
+      properties:
+        code:
+          type: number
+        name:
+          type: string
+        learning_formats:
+          type: array
+          items:
+            $ref: "#/components/schemas/LearningFormatDto"
+      required: [code, name, learning_formats]
+
+    SpecialityDto:
+      type: object
+      properties:
+        code:
+          type: number
+        name:
+          type: string
+      required: [code, name]
+
+    SpecialityLearningFormatsDto:
+      type: object
+      properties:
+        learning_formats:
+          type: array
+          items:
+            type: string
 
   parameters:
     id_in_path:
@@ -216,6 +266,12 @@ components:
       in: path
       schema:
         type: string
+    code_in_path:
+      name: code
+      required: true
+      in: path
+      schema:
+        type: number
     query_document_type:
       name: type
       required: true
@@ -263,9 +319,13 @@ components:
       value:
         id: "30b00eac-6e5b-4263-aef3-bde3140d7eb6"
         documents: []
-        speciality: "SPEC_121"
+        speciality:
+          code: 121
+          name: "Software Engineering"
         funding: "Budget"
-        learning_format: "FullTime"
+        learning_format:
+          id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+          name: "заочна"
         createdAt: "2022-02-20T14:35:22.558884Z"
         status: "Preparing"
         statusMessage: null
@@ -274,9 +334,13 @@ components:
       value:
         id: "30b00eac-6e5b-4263-aef3-bde3140d7eb6"
         documents: ["Passport", "Photo", "Contract"]
-        speciality: "SPEC_123"
+        speciality:
+          code: 123
+          name: "Computer Engineering"
         funding: "Budget"
-        learning_format: "FullTime"
+        learning_format:
+          id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+          name: "денна"
         createdAt: "2022-02-20T14:35:22.558884Z"
         status: "InReview"
         statusMessage: null
@@ -285,9 +349,13 @@ components:
       value:
         id: "30b00eac-6e5b-4263-aef3-bde3140d7eb6"
         documents: ["Passport", "Photo", "Contract"]
-        speciality: "SPEC_126"
+        speciality:
+          code: 126
+          name: "Information Systems & Technologies"
         funding: "Contract"
-        learning_format: "FullTime"
+        learning_format:
+          id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+          name: "денна"
         createdAt: "2022-02-20T14:35:22.558884Z"
         status: "Rejected"
         statusMessage: "Rejected because of invalid documents"
@@ -297,25 +365,37 @@ components:
         applications:
           - id: "30b00eac-6e5b-4263-aef3-bde3140d7eb6"
             documents: [ ]
-            speciality: "SPEC_121"
+            speciality:
+              code: 126
+              name: "Information Systems & Technologies"
             funding: "Budget"
-            learning_format: "FullTime"
+            learning_format:
+              id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+              name: "денна"
             createdAt: "2022-02-20T14:35:22.558884Z"
             status: "Preparing"
             statusMessage: null
           - id: "30b00eac-6e5b-4263-aef3-bde3140d7eb6"
             documents: [ "Passport", "Photo", "Contract" ]
-            speciality: "SPEC_123"
+            speciality:
+              code: 123
+              name: "Computer Engineering"
             funding: "Budget"
-            learning_format: "FullTime"
+            learning_format:
+              id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+              name: "денна"
             createdAt: "2022-02-20T14:35:22.558884Z"
             status: "InReview"
             statusMessage: null
           - id: "30b00eac-6e5b-4263-aef3-bde3140d7eb6"
             documents: [ "Passport", "Photo", "Contract" ]
-            speciality: "SPEC_126"
+            speciality:
+              code: 126
+              name: "Information Systems & Technologies"
             funding: "Contract"
-            learning_format: "FullTime"
+            learning_format:
+              id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+              name: "денна"
             createdAt: "2022-02-20T14:35:22.558884Z"
             status: "Rejected"
             statusMessage: "Rejected because of invalid documents"
@@ -338,6 +418,63 @@ components:
         speciality: "SPEC_121"
         funding: "Budget"
         learning_format: "FullTime"
+
+    AllDetailedSpecialitiesDtoExample:
+      value:
+        specialities:
+          - code: 121
+            name: "Software Engineering"
+            learning_formats:
+              - id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+                name: "заочна"
+              - id: "ad0e572d-966d-4efa-8355-8417638c6d04"
+                name: "денна"
+          - code: 123
+            name: "Computer Engineering"
+            learning_formats:
+              - id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+                name: "заочна"
+          - code: 126
+            name: "Information Systems & Technologies"
+            learning_formats: []
+
+    AllLearningFormatsDtoExample:
+      value:
+        formats:
+          - id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+            name: "заочна"
+          - id: "ad0e572d-966d-4efa-8355-8417638c6d04"
+            name: "денна"
+
+    CreateLearningFormatDtoExample:
+      value:
+        name: "денна"
+
+    LearningFormatDtoExample:
+      value:
+        id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+        name: "денна"
+
+    SpecialityDetailedDtoExample:
+      value:
+        - code: 121
+          name: "Software Engineering"
+          learning_formats:
+            - id: "ad0e577d-966d-4efa-8300-8417638c6d08"
+              name: "заочна"
+            - id: "ad0e572d-966d-4efa-8355-8417638c6d04"
+              name: "денна"
+
+    SpecialityDtoExample:
+      value:
+        - code: 121
+          name: "Software Engineering"
+
+    SpecialityLearningFormatsDtoExample:
+      value:
+        learning_formats:
+          - "ad0e572d-966d-4efa-8355-8417638c6d04"
+          - "ad0e577d-966d-4efa-8300-8417638c6d08"
 
 security:
   - bearerAuth: []
@@ -763,3 +900,170 @@ paths:
           description: "Authentication failed"
         404:
           description: "Operator not found"
+
+  /learning-formats:
+    get:
+      tags: [Learning Formats]
+      summary: "List of all learning formats"
+      responses:
+        200:
+          description: "List of learning formats obtained"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AllLearningFormatsDto"
+              examples:
+                "Learning formats":
+                  $ref: "#/components/examples/AllLearningFormatsDtoExample"
+        500:
+          description: "Internal error"
+
+    post:
+      tags: [Learning Formats]
+      summary: "This endpoint available only to admin"
+      description: "Create learning format"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLearningFormatDto'
+            examples:
+              "Create learning format":
+                $ref: '#/components/examples/CreateLearningFormatDtoExample'
+      responses:
+        200:
+          description: "Learning format created successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningFormatDto"
+              examples:
+                "Learning formats":
+                  $ref: "#/components/examples/LearningFormatDtoExample"
+        500:
+          description: "Internal error"
+
+    put:
+      tags: [Learning Formats]
+      summary: "This endpoint available only to admin"
+      description: "Update learning format"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearningFormatDto'
+            examples:
+              "Update learning format":
+                $ref: '#/components/examples/LearningFormatDtoExample'
+      responses:
+        200:
+          description: "Learning format updated successfully"
+        500:
+          description: "Internal error"
+
+  /learning-formats/{id}:
+    delete:
+      tags: [Learning Formats]
+      summary: "This endpoint available only to admin"
+      description: "Delete learning format"
+      parameters:
+        - $ref: "#components/parameters/id_in_path"
+      responses:
+        200:
+          description: "Learning format deleted successfully"
+        500:
+          description: "Internal error"
+
+  /specialities:
+    get:
+      tags: [Specialities]
+      summary: "List of all specialities"
+      responses:
+        200:
+          description: "List of specialities obtained"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AllDetailedSpecialitiesDto"
+              examples:
+                "Specialities":
+                  $ref: "#/components/examples/AllDetailedSpecialitiesDtoExample"
+        500:
+          description: "Internal error"
+
+    post:
+      tags: [Specialities]
+      summary: "This endpoint available only to admin"
+      description: "Create speciality"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialityDto'
+            examples:
+              "Create speciality":
+                $ref: '#/components/examples/SpecialityDtoExample'
+      responses:
+        200:
+          description: "Speciality created successfully"
+        500:
+          description: "Internal error"
+
+  /specialities/{code}:
+    put:
+      tags: [Specialities]
+      summary: "This endpoint available only to admin"
+      description: "Update speciality"
+      parameters:
+        - $ref: "#components/parameters/code_in_path"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialityDto'
+            examples:
+              "Update speciality":
+                $ref: '#/components/examples/SpecialityDtoExample'
+      responses:
+        200:
+          description: "Speciality updated successfully"
+        400:
+          description: "Invalid request"
+
+    delete:
+      tags: [Specialities]
+      summary: "This endpoint available only to admin"
+      description: "Delete speciality"
+      parameters:
+        - $ref: "#components/parameters/code_in_path"
+      responses:
+        200:
+          description: "Speciality deleted successfully"
+        500:
+          description: "Internal error"
+
+  /specialities/{code}/learning-formats:
+    put:
+      tags: [Specialities]
+      summary: "This endpoint available only to admin"
+      description: "Update speciality learning formats"
+      parameters:
+        - $ref: "#components/parameters/code_in_path"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialityLearningFormatsDto'
+            examples:
+              "Add learning format":
+                $ref: '#/components/examples/SpecialityLearningFormatsDtoExample'
+      responses:
+        200:
+          description: "Speciality learning formats updated successfully"
+        400:
+          description: "Invalid request"

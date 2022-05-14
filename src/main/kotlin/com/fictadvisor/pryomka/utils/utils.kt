@@ -6,7 +6,6 @@ import com.fictadvisor.pryomka.domain.models.Application
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
-import org.apache.commons.codec.binary.Hex
 import java.util.*
 
 /** Parses user id from request's principals.

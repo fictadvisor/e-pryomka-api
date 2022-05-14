@@ -1,5 +1,7 @@
 package com.fictadvisor.pryomka.api.dto
 
+import com.fictadvisor.pryomka.api.dto.faculty.LearningFormatDto
+import com.fictadvisor.pryomka.api.dto.faculty.SpecialityDto
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.DocumentType
 import kotlinx.datetime.Instant
@@ -10,10 +12,10 @@ import kotlinx.serialization.Serializable
 data class ApplicationResponseDto(
     val id: String,
     val documents: Set<DocumentType>,
-    val speciality: Application.Speciality,
+    val speciality: SpecialityDto,
     val funding: Application.Funding,
     @SerialName("learning_format")
-    val learningFormat: Application.LearningFormat,
+    val learningFormat: LearningFormatDto,
     @SerialName("created_at")
     val createdAt: Instant,
     val status: Application.Status,
@@ -28,8 +30,8 @@ data class ApplicationListDto(
 
 @Serializable
 data class ApplicationRequestDto(
-    val speciality: Application.Speciality,
+    val speciality: SpecialityDto,
     val funding: Application.Funding,
     @SerialName("learning_format")
-    val learningFormat: Application.LearningFormat,
+    val learningFormat: LearningFormatDto,
 )

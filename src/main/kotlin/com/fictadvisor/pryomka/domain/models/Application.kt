@@ -1,5 +1,7 @@
 package com.fictadvisor.pryomka.domain.models
 
+import com.fictadvisor.pryomka.domain.models.faculty.LearningFormat
+import com.fictadvisor.pryomka.domain.models.faculty.Speciality
 import kotlinx.datetime.Instant
 
 /** Represents entrant's application. */
@@ -41,18 +43,6 @@ data class Application(
         val isNegativelyTerminated get() = this == Cancelled || this == Rejected
     }
 
-    /** Represents a speciality of FICT which application belongs to. */
-    enum class Speciality {
-        /** 121 - Software Engineering */
-        SPEC_121,
-
-        /** 123 - Computer Engineering */
-        SPEC_123,
-
-        /** 126 - Information System And Technologies */
-        SPEC_126,
-    }
-
     /** Represents a type of tuition which application belongs to. */
     enum class Funding {
         /** Studying is funded by the government of Ukraine */
@@ -60,15 +50,6 @@ data class Application(
 
         /** Studying is funded by a private individual or a private enterprise. */
         Contract,
-    }
-
-    /** Represents a type of tuition which application belongs to. */
-    enum class LearningFormat {
-        /** Student studies in campus in a common manner. */
-        FullTime,
-
-        /** Student studies at home and only visits campus for a certification. */
-        PartTime,
     }
 
     /** Appends set this application documents with the new ones.

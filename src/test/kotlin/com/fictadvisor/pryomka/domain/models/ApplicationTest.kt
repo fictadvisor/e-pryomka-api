@@ -1,11 +1,16 @@
 package com.fictadvisor.pryomka.domain.models
 
+import com.fictadvisor.pryomka.domain.models.faculty.LearningFormat
+import com.fictadvisor.pryomka.domain.models.faculty.Speciality
 import kotlinx.datetime.Clock
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class ApplicationTest {
+    private val fullTime = LearningFormat(generateLearningFormatId(), "full time studying")
+    private val spec121 = Speciality(121, "Software Engineering")
+
     @Test
     fun `test application plus with empty docs`() {
         // GIVEN
@@ -13,9 +18,9 @@ internal class ApplicationTest {
             id = ApplicationIdentifier(UUID(0, 0)),
             userId = UserIdentifier(UUID(0, 0)),
             documents = setOf(),
-            speciality = Application.Speciality.SPEC_121,
+            speciality = spec121,
             funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
+            learningFormat = fullTime,
             createdAt = Clock.System.now(),
             status = Application.Status.Approved,
         )
@@ -37,9 +42,9 @@ internal class ApplicationTest {
             id = ApplicationIdentifier(UUID(0, 0)),
             userId = UserIdentifier(UUID(0, 0)),
             documents = setOf(DocumentType.Passport),
-            speciality = Application.Speciality.SPEC_121,
+            speciality = spec121,
             funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
+            learningFormat = fullTime,
             createdAt = Clock.System.now(),
             status = Application.Status.Approved,
         )

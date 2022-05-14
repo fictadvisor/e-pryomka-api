@@ -33,5 +33,8 @@ private fun createTables() = transaction {
         Applications,
         Reviews,
         Tokens,
+        LearningFormats,
+        Specialities,
+        SpecialitiesFormats,
     )
 }

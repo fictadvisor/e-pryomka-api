@@ -3,6 +3,10 @@ package com.fictadvisor.pryomka.api
 import api.routes.rusniaRoutes
 import com.fictadvisor.pryomka.api.dto.CreateOperatorDto
 import com.fictadvisor.pryomka.api.routes.*
+import com.fictadvisor.pryomka.api.routes.faculty.learningFormatsAdminRoutes
+import com.fictadvisor.pryomka.api.routes.faculty.learningFormatsRoutes
+import com.fictadvisor.pryomka.api.routes.faculty.specialityAdminRoutes
+import com.fictadvisor.pryomka.api.routes.faculty.specialityRoutes
 import com.fictadvisor.pryomka.domain.interactors.RegisterStaffUseCase
 import com.fictadvisor.pryomka.domain.models.User
 import io.ktor.application.*
@@ -20,11 +24,15 @@ fun Application.configureRouting() {
     routing {
         authenticate(AUTH_GENERAL) {
             generalApplicationsRouters()
+            specialityRoutes()
+            learningFormatsRoutes()
             meRoute()
         }
 
         authenticate(AUTH_ADMIN) {
             operatorsRoutes()
+            specialityAdminRoutes()
+            learningFormatsAdminRoutes()
         }
 
         authenticate(AUTH_OPERATOR) {

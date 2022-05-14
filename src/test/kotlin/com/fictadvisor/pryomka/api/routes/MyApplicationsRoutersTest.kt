@@ -5,6 +5,8 @@ import com.fictadvisor.pryomka.api.AUTH_ENTRANT
 import com.fictadvisor.pryomka.api.configureSecurity
 import com.fictadvisor.pryomka.api.dto.ApplicationListDto
 import com.fictadvisor.pryomka.api.dto.ApplicationRequestDto
+import com.fictadvisor.pryomka.api.dto.faculty.LearningFormatDto
+import com.fictadvisor.pryomka.api.dto.faculty.SpecialityDto
 import com.fictadvisor.pryomka.api.mappers.toDto
 import com.fictadvisor.pryomka.domain.datasource.TokenDataSource
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
@@ -14,6 +16,7 @@ import com.fictadvisor.pryomka.domain.interactors.AuthUseCaseImpl
 import com.fictadvisor.pryomka.domain.interactors.SubmitDocumentUseCase
 import com.fictadvisor.pryomka.domain.models.Application
 import com.fictadvisor.pryomka.domain.models.Duplicated
+import com.fictadvisor.pryomka.domain.models.generateLearningFormatId
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -60,6 +63,8 @@ class MyApplicationsRoutersTest : KoinTest {
     private val authUseCase: AuthUseCase by inject()
     private val entrant = entrant()
     private val telegramData = telegramData(id = entrant.telegramId, tgBotId = config.tgBotId)
+    private val speciality = SpecialityDto(121, "Software Engineering")
+    private val learningFormat = LearningFormatDto(generateLearningFormatId().value.toString(), "Full time studying")
 
     private inline fun withMyApplicationsRouters(
         crossinline test: TestApplicationEngine.() -> Unit
@@ -142,9 +147,9 @@ class MyApplicationsRoutersTest : KoinTest {
         // GIVEN
         val (token, _) = authUseCase.exchange(telegramData)
         val application = ApplicationRequestDto(
-            speciality = Application.Speciality.SPEC_121,
+            speciality = speciality,
             funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
+            learningFormat = learningFormat,
         )
 
         // WHEN + THEN
@@ -165,9 +170,9 @@ class MyApplicationsRoutersTest : KoinTest {
         // GIVEN
         val (token, _) = authUseCase.exchange(telegramData)
         val application = ApplicationRequestDto(
-            speciality = Application.Speciality.SPEC_121,
+            speciality = speciality,
             funding = Application.Funding.Budget,
-            learningFormat = Application.LearningFormat.FullTime,
+            learningFormat = learningFormat,
         )
 
         declareSuspendMock<ApplicationUseCase> {

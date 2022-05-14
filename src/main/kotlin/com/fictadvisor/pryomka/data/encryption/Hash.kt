@@ -1,6 +1,7 @@
 package com.fictadvisor.pryomka.data.encryption
 
 import com.fictadvisor.pryomka.domain.models.TelegramData
+import com.fictadvisor.pryomka.utils.toHexString
 import org.apache.commons.codec.binary.Hex
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -66,6 +67,6 @@ object Hash {
         )
 
         hmac.init(secretKey)
-        return Hex.encodeHexString(hmac.doFinal(dataCheckString))
+        return hmac.doFinal(dataCheckString).toHexString()
     }
 }

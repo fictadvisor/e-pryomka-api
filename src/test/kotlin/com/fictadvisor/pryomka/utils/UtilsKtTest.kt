@@ -56,4 +56,27 @@ internal class UtilsKtTest {
         // WHEN+THEN
         assertNull(string.toUUIDOrNull())
     }
+
+    @Test
+    fun `test toHexString - usual byte array`() {
+        // GIVEN
+        val array = byteArrayOf(
+            0x0, 0x1, 0x10, 0x7f, -0x80, 0x28, 0x39, 0x11, 0xf
+        )
+
+        // WHEN+THEN
+        assertEquals("0001107f802839110f", array.toHexString())
+    }
+
+
+    @Test
+    fun `test toHexString - another byte array`() {
+        // GIVEN
+        val array = byteArrayOf(
+            0x10, 0xe, 0x1a, 0x3b, 0x44, 0x2f, 0x6c, 0x01, 0x1a
+        )
+
+        // WHEN+THEN
+        assertEquals("100e1a3b442f6c011a", array.toHexString())
+    }
 }

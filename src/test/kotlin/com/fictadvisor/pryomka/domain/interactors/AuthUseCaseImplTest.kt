@@ -11,6 +11,7 @@ import com.fictadvisor.pryomka.verify
 import com.fictadvisor.pryomka.whenever
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
@@ -333,9 +334,10 @@ class AuthUseCaseImplTest {
     @Test
     fun `should not exchange tokens if verification failed`(): Unit = runBlocking {
         // GIVEN
-        val data = telegramData(tgBotId = config.tgBotId).copy(
-            hash = "12345678bc23181fcfecf20c82d7a119316fad7c24e076d163169c8b2e211673"
-        )
+        val data = telegramData(tgBotId = config.tgBotId).mapValues { (k, v) ->
+            if (k == "hash") JsonPrimitive("12345678bc23181fcfecf20c82d7a119316fad7c24e076d163169c8b2e211673")
+            else v
+        }
 
         // WHEN+THEN
         assertThrows<IllegalArgumentException> { useCase.exchange(data) }

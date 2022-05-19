@@ -1,6 +1,7 @@
 package com.fictadvisor.pryomka.data.encryption
 
 import com.fictadvisor.pryomka.telegramData
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.*
 
@@ -137,7 +138,7 @@ class HashTest {
         // GIVEN
         val data = telegramData()
         val hash = Hash.hashTelegramData(data, tgBotId)
-        val hashedData = data.copy(hash = hash)
+        val hashedData = data + ("hash" to JsonPrimitive(hash))
 
         // WHEN+THEN
         assertTrue {
@@ -150,7 +151,7 @@ class HashTest {
         // GIVEN
         val data = telegramData()
         val hash = Hash.hashTelegramData(data, tgBotId)
-        val hashedData = data.copy(hash = hash)
+        val hashedData = data + ("hash" to JsonPrimitive(hash))
         val anotherBotId = "1234578938:ABGEHE_2_9razcj9t1zAw1JaYA31zz16bQp"
 
         // WHEN+THEN

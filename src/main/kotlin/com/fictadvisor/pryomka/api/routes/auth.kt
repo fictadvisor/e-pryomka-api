@@ -3,7 +3,6 @@ package com.fictadvisor.pryomka.api.routes
 import com.fictadvisor.pryomka.api.dto.LogInRequestDto
 import com.fictadvisor.pryomka.api.dto.LogInResponseDto
 import com.fictadvisor.pryomka.api.dto.RefreshRequest
-import com.fictadvisor.pryomka.api.dto.TelegramDataDto
 import com.fictadvisor.pryomka.api.mappers.toTelegramData
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCase
 import io.ktor.application.*
@@ -36,13 +35,30 @@ fun Route.authRouters() {
         }
     }
 
-    post<TelegramDataDto>("/exchange") { telegramDataDto ->
+    post("/exchange") {
         try {
-            val (access, refresh) = authUseCase.exchange(telegramDataDto.toTelegramData())
+            val buf = mutableListOf<Byte>()
+
+            call.request.receiveChannel().read {
+                while (it.hasRemaining()) buf += it.get()
+            }
+
+            val body = String(buf.toByteArray())
+            val (access, refresh) = authUseCase.exchange(body.toTelegramData())
             call.respond(LogInResponseDto(access, refresh))
         } catch (e: Exception) {
             e.printStackTrace()
             call.respond(HttpStatusCode.Unauthorized)
         }
+    }
+
+    get("/logout") {
+        val token = call.request.headers["Authorization"]
+            ?.substringAfter("Bearer")
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?: return@get call.respond(HttpStatusCode.BadRequest)
+
+        call.respond(HttpStatusCode.NotImplemented)
     }
 }

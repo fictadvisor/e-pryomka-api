@@ -5,6 +5,7 @@ import com.fictadvisor.pryomka.domain.datasource.TokenDataSource
 import com.fictadvisor.pryomka.domain.datasource.UserDataSource
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCase
 import com.fictadvisor.pryomka.domain.interactors.AuthUseCaseImpl
+import com.fictadvisor.pryomka.domain.models.id
 import com.fictadvisor.pryomka.domain.models.toUserIdentifier
 import io.ktor.application.*
 import io.ktor.auth.*

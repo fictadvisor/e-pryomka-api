@@ -2,6 +2,12 @@ package com.fictadvisor.pryomka.data.encryption
 
 import com.fictadvisor.pryomka.domain.models.TelegramData
 import com.fictadvisor.pryomka.utils.toHexString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.Json.Default.decodeFromString
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.*
@@ -50,22 +56,26 @@ object Hash {
         return Base64.getEncoder().encodeToString(salt)
     }
 
-    fun verifyTelegramData(data: TelegramData, tgBotId: String): Boolean {
-        return data.hash == hashTelegramData(data, tgBotId)
+    fun verifyTelegramData(data: Map<String, JsonElement>, tgBotId: String): Boolean {
+        val hash = (data["hash"] as JsonPrimitive).content
+        return hash == hashTelegramData(data - "hash", tgBotId)
     }
 
-    fun hashTelegramData(data: TelegramData, tgBotId: String): String {
-        val dataCheckString = data.dataCheckString.toByteArray()
+    fun hashTelegramData(data: Map<String, JsonElement>, tgBotId: String): String {
+        val dataCheckString = data.keys
+            .sorted()
+            .joinToString("\n") { key ->
+                val value = (data[key] as JsonPrimitive).content
+                "$key=${value}"
+            }
 
-        val hmac = Mac.getInstance("HmacSHA256")
-
-        val sha256 = MessageDigest.getInstance("SHA-256")
         val secretKey = SecretKeySpec(
-            sha256.digest(tgBotId.toByteArray()),
+            MessageDigest.getInstance("SHA-256").digest(tgBotId.toByteArray()),
             "HmacSHA256"
         )
 
+        val hmac = Mac.getInstance("HmacSHA256")
         hmac.init(secretKey)
-        return hmac.doFinal(dataCheckString).toHexString()
+        return hmac.doFinal(dataCheckString.toByteArray()).toHexString()
     }
 }

@@ -8,6 +8,8 @@ import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.faculty.LearningFormat
 import com.fictadvisor.pryomka.domain.models.faculty.Speciality
 import kotlinx.datetime.Clock
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 fun Application.toDto() = ApplicationResponseDto(
     id = id.value.toString(),
@@ -53,15 +55,7 @@ fun User.toWhoAmIDto() = when (this) {
     )
 }
 
-fun TelegramDataDto.toTelegramData() = TelegramData(
-    authDate,
-    firstName,
-    id,
-    lastName,
-    photoUrl,
-    userName,
-    hash,
-)
+fun String.toTelegramData(): TelegramData = let(Json::decodeFromString)
 
 fun SpecialityDto.toDomain() = Speciality(code, name)
 

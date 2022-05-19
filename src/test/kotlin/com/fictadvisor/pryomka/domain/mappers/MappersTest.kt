@@ -1,8 +1,8 @@
 package com.fictadvisor.pryomka.domain.mappers
 
-import com.fictadvisor.pryomka.api.dto.TelegramDataDto
 import com.fictadvisor.pryomka.api.mappers.toTelegramData
-import com.fictadvisor.pryomka.domain.models.TelegramData
+import com.fictadvisor.pryomka.telegramData
+import com.fictadvisor.pryomka.telegramDataDto
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -10,23 +10,23 @@ class MappersTest {
     @Test
     fun `TelegramDataDto to TelegramData`() {
         // GIVEN
-        val dto = TelegramDataDto(
+        val dto = telegramDataDto(
             authDate = 123,
             id = 456,
             firstName = "lelouch",
             lastName = "lamperouge",
             userName = null,
             photoUrl = "http://photo.com",
-            hash = "qwerty"
+            tgBotId = "1",
         )
-        val data = TelegramData(
+        val data = telegramData(
             authDate = 123,
             id = 456,
             firstName = "lelouch",
             lastName = "lamperouge",
             userName = null,
             photoUrl = "http://photo.com",
-            hash = "qwerty"
+            tgBotId = "1",
         )
 
         // WHEN+THEN

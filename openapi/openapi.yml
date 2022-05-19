@@ -646,6 +646,17 @@ paths:
         401:
           description: "Authentication failed. Refesh token is not valid."
 
+  /logout:
+    get:
+      tags:
+        - Auth
+      summary: "Log user out"
+      responses:
+        200:
+          description: "User logged out"
+        401:
+          description: "Authentication failed"
+
   /applications:
     get:
       tags: [Applications]

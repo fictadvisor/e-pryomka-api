@@ -1,6 +1,5 @@
 package com.fictadvisor.pryomka
 
-import com.fictadvisor.pryomka.api.dto.TelegramDataDto
 import com.fictadvisor.pryomka.data.encryption.Hash
 import com.fictadvisor.pryomka.domain.models.*
 import com.fictadvisor.pryomka.domain.models.Application
@@ -18,6 +17,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
 import org.koin.core.qualifier.Qualifier
 import org.koin.test.KoinTest
 import org.koin.test.mock.declareMock
@@ -100,11 +100,18 @@ fun telegramData(
     photoUrl: String? = "http://photos.com/lelouch",
     tgBotId: String? = null,
 ): TelegramData {
-    var data = TelegramData(authDate, firstName, id, lastName, userName, photoUrl, "")
+    var data = mutableMapOf(
+        "auth_date" to JsonPrimitive(authDate),
+        "id" to JsonPrimitive(id),
+        "first_name" to JsonPrimitive(firstName),
+        "last_name" to JsonPrimitive(lastName),
+        "username" to JsonPrimitive(userName),
+        "photo_url" to JsonPrimitive(photoUrl),
+    )
 
     tgBotId?.let {
         val hash = Hash.hashTelegramData(data, it)
-        data = data.copy(hash = hash)
+        data += "hash" to JsonPrimitive(hash)
     }
 
     return data
@@ -118,19 +125,9 @@ fun telegramDataDto(
     lastName: String? = "Lamperouge",
     userName: String? = "lelouch",
     photoUrl: String? = "http://photos.com/lelouch",
-): TelegramDataDto {
-    val data = TelegramData(authDate, firstName, id, lastName, userName, photoUrl, "")
-    val hash = Hash.hashTelegramData(data, tgBotId)
-
-    return TelegramDataDto(
-        data.authDate,
-        data.id,
-        data.firstName,
-        data.lastName,
-        data.userName,
-        data.photoUrl,
-        hash,
-    )
+): String {
+    val data = telegramData(authDate, id, firstName, lastName, userName, photoUrl, tgBotId)
+    return Json.encodeToString(data)
 }
 
 inline fun <reified T : Any> KoinTest.declareSuspendMock(

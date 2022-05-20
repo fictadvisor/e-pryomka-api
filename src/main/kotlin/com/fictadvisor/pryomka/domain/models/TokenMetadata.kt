@@ -9,7 +9,8 @@ import java.util.*
 data class TokenMetadata(
     val userId: UserIdentifier,
     val validUntil: Date,
-    val type: Type
+    val type: Type,
+    val pairedTokenId: Int? = null,
 ) {
     enum class Type {
         /** Access token is used to receive access to the API. */

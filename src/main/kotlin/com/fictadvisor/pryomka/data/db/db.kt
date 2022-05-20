@@ -75,6 +75,11 @@ object Tokens : Table() {
     val userId = uuid("user_id")
     val validUntil = timestamp("valid_until")
     val type = enumeration("type", TokenMetadata.Type::class)
+    val pairedToken = integer("paired_token")
+        .references(Tokens.id, onDelete = ReferenceOption.CASCADE)
+        .nullable()
+
+    override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
 object LearningFormats : Table("learning_formats") {

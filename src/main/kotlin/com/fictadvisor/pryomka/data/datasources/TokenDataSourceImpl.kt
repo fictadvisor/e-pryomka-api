@@ -18,7 +18,7 @@ class TokenDataSourceImpl(
     override suspend fun saveToken(
         token: String,
         metadata: TokenMetadata,
-    ): Unit = newSuspendedTransaction(dispatcher) {
+    ): Int = newSuspendedTransaction(dispatcher) {
         Tokens.insert {
             val salt = Hash.generateSalt()
             it[Tokens.userId] = metadata.userId.value
@@ -26,7 +26,8 @@ class TokenDataSourceImpl(
             it[Tokens.salt] = salt
             it[Tokens.validUntil] = Instant.ofEpochMilli(metadata.validUntil.time)
             it[Tokens.type] = metadata.type
-        }
+            it[Tokens.pairedToken] = metadata.pairedTokenId
+        }.resultedValues?.first()?.get(Tokens.id) ?: error("Failed to get inserted token's id")
     }
 
     override suspend fun findAccessToken(token: String): TokenMetadata? = findTokenByType(

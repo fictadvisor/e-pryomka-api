@@ -59,6 +59,11 @@ fun Route.authRouters() {
             ?.takeIf { it.isNotBlank() }
             ?: return@get call.respond(HttpStatusCode.BadRequest)
 
-        call.respond(HttpStatusCode.NotImplemented)
+        try {
+            authUseCase.logout(token)
+            call.respond(HttpStatusCode.OK)
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, e.message ?: "Failed to log out")
+        }
     }
 }

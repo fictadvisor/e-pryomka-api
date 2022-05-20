@@ -40,6 +40,9 @@ interface AuthUseCase {
      * @return [Pair] where [Pair.first] is an access token and [Pair.second] is a refresh token */
     suspend fun exchange(telegramData: TelegramData): Pair<String, String>
 
+    /** Deletes user's refresh and access tokens */
+    suspend fun logout(accessToken: String)
+
     /** System security configuration for JWT tokens.
      * Can be replaced for testing. In real application, [Config.DEFAULT] should be used. */
     data class Config(
@@ -125,19 +128,27 @@ class AuthUseCaseImpl(
         return generateTokens(entrant.id)
     }
 
+    override suspend fun logout(accessToken: String) {
+        val (_, validUntil) = tokenDataSource.findAccessToken(accessToken)
+            ?: error("Token not found")
+
+        val tokenValid = Date().before(validUntil)
+
+        if (tokenValid) tokenDataSource.deleteToken(accessToken) else error("Token expired")
+    }
+
     private suspend fun generateTokens(userId: UserIdentifier): Pair<String, String> {
         val (accessToken, accessValidUntil) = generateAccessToken(userId)
         val (refreshToken, refreshValidUntil) = generateRefreshToken()
 
-        tokenDataSource.saveToken(
-            refreshToken,
-            TokenMetadata(userId, refreshValidUntil, TokenMetadata.Type.Refresh)
-        )
-        tokenDataSource.saveToken(
+        val id = tokenDataSource.saveToken(
             accessToken,
             TokenMetadata(userId, accessValidUntil, TokenMetadata.Type.Access)
         )
-
+        tokenDataSource.saveToken(
+            refreshToken,
+            TokenMetadata(userId, refreshValidUntil, TokenMetadata.Type.Refresh, id)
+        )
         return accessToken to refreshToken
     }
 

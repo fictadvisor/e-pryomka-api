@@ -648,8 +648,7 @@ paths:
 
   /logout:
     get:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: "Log user out"
       responses:
         200:

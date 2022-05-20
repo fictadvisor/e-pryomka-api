@@ -40,6 +40,11 @@ class AuthUseCaseImplTest {
     private val accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJodHRwczovL3ZzdHVwLmZpY3RhZHZpc29yLmNvbS9hcGkvIiwidXNlcl9pZCI6ImUxNGNmZGZmLTM1ZTEtNGNlYi05NzgwLTkyMDYxNjEwMjU3MiIsImlzcyI6Imh0dHBzOi8vdnN0dXAuZmljdGFkdmlzb3IuY29tLyIsImV4cCI6MTY0NTM0OTY0NH0.rxLeRplrgsl8VfSNZHqQegBdvPSGSFFpGcQmKN9bN8c"
     private val refreshToken = "t5hsSBhlpS6fVu92go4liGbthT3ta6frmexqLaT674g="
 
+    @BeforeTest
+    fun init(): Unit = runBlocking {
+        whenever(tokenDataSource.saveToken(any(), any())).thenReturn(0)
+    }
+
     @Test
     fun `should generate tokens for staff login`(): Unit = runBlocking {
         // GIVEN

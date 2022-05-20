@@ -100,7 +100,9 @@ class ApiSecurityTest : KoinTest {
             whenever(findStaffByCredentials("admin", "admin")).thenReturn(admin)
         }
 
-        declareMock<TokenDataSource> {}
+        declareSuspendMock<TokenDataSource> {
+            whenever(saveToken(any(), any())).thenReturn(0)
+        }
     }
 
     @Test

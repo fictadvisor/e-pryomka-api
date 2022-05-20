@@ -77,7 +77,10 @@ class GeneralApplicationEndpointsTest : KoinTest {
             whenever(findStaff(any(), any())).thenReturn(admin)
         }
 
-        declareMock<TokenDataSource> {}
+        declareSuspendMock<TokenDataSource> {
+            whenever(saveToken(any(), any())).thenReturn(1)
+        }
+
         declareMock<ChangeApplicationStatusUseCase> {}
     }
 

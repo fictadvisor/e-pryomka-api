@@ -46,7 +46,6 @@ class MyApplicationsRoutersTest : KoinTest {
         modules(module {
             single<ApplicationUseCase> { declareMock() }
             single<SubmitDocumentUseCase> { declareMock() }
-            single<TokenDataSource> { declareMock() }
             single<AuthUseCase> { AuthUseCaseImpl(get(), get(), config) }
         })
     }
@@ -84,6 +83,10 @@ class MyApplicationsRoutersTest : KoinTest {
 
     @BeforeTest
     fun init() {
+        declareSuspendMock<TokenDataSource> {
+            whenever(saveToken(any(), any())).thenReturn(1)
+        }
+
         declareSuspendMock<UserDataSource> {
             whenever(findEntrant(entrant.id)).thenReturn(entrant)
             whenever(findEntrantByTelegramId(entrant.telegramId)).thenReturn(entrant)

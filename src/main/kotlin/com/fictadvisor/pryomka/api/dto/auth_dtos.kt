@@ -1,7 +1,6 @@
 package com.fictadvisor.pryomka.api.dto
 
 import com.fictadvisor.pryomka.domain.models.User
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable

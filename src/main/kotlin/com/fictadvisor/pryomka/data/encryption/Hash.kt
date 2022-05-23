@@ -1,12 +1,7 @@
 package com.fictadvisor.pryomka.data.encryption
 
-import com.fictadvisor.pryomka.domain.models.TelegramData
 import com.fictadvisor.pryomka.utils.toHexString
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.Json.Default.decodeFromString
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.security.MessageDigest
 import java.security.SecureRandom

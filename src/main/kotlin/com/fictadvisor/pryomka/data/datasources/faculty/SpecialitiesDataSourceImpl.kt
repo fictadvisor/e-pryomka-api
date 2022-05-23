@@ -3,7 +3,6 @@ package com.fictadvisor.pryomka.data.datasources.faculty
 import com.fictadvisor.pryomka.data.db.LearningFormats
 import com.fictadvisor.pryomka.data.db.Specialities
 import com.fictadvisor.pryomka.data.db.SpecialitiesFormats
-import com.fictadvisor.pryomka.data.db.SpecialitiesFormats.learningFormat
 import com.fictadvisor.pryomka.data.db.SpecialitiesFormats.speciality
 import com.fictadvisor.pryomka.data.db.db
 import com.fictadvisor.pryomka.data.mappers.toSpeciality
@@ -12,7 +11,6 @@ import com.fictadvisor.pryomka.domain.models.LearningFormatIdentifier
 import com.fictadvisor.pryomka.domain.models.faculty.Speciality
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.selects.select
 import org.jetbrains.exposed.sql.*
 
 class SpecialitiesDataSourceImpl(

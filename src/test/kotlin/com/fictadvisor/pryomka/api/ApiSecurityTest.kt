@@ -18,12 +18,10 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.koin.dsl.module
-import org.koin.ktor.ext.modules
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.inject
 import org.koin.test.mock.MockProviderRule
-import org.koin.test.mock.declareMock
 import org.mockito.Mockito
 import kotlin.test.BeforeTest
 import kotlin.test.Test
